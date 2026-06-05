@@ -2,7 +2,7 @@ import axios from "axios";
 
 
 const api = axios.create({
-	baseURL: import.meta.env.VITE_JOB_TRACKER_API
+	baseURL: import.meta.env.ECOMMERCE_WORKFLOW_MANAGEMENT_API
 });
 
 api.interceptors.request.use((config) => {
