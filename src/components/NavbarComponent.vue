@@ -17,7 +17,7 @@ const emit = defineEmits(['open-reset'])
 
     <div class="container">
 
-      <router-link :to="{ name: 'Home' }" id="brand" class="navbar-brand">Global Shop</router-link>
+      <router-link :to="{ name: 'Home' }" id="brand" class="navbar-brand">GlobalCart</router-link>
       <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavAltMarkup"
         aria-controls="navbarNavAltMarkup" aria-expanded="false" aria-label="Toggle navigation">
         <span class="navbar-toggler-icon"></span>
