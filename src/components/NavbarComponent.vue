@@ -32,11 +32,7 @@ onBeforeUnmount(() => {
       <!-- Brand -->
       <router-link :to="{ name: 'Home' }" class="gs-brand">
         <span class="gs-brand-icon">
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-            <path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/>
-            <line x1="3" y1="6" x2="21" y2="6"/>
-            <path d="M16 10a4 4 0 01-8 0"/>
-          </svg>
+          <img src="/globalcart.png" alt="GlobalShop" width="60" height="60" style="object-fit: contain;" />
         </span>
         <span class="gs-brand-name">Global<span class="gs-brand-accent">Cart</span></span>
       </router-link>
@@ -154,14 +150,8 @@ onBeforeUnmount(() => {
 }
 
 .gs-brand-icon {
-  width: 36px;
-  height: 36px;
-  background: linear-gradient(135deg, #6366f1, #8b5cf6);
-  border-radius: 10px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: white;
+  /* remove: background: linear-gradient(135deg, #6366f1, #8b5cf6); */
+  background: transparent;
 }
 
 .gs-brand-name {
