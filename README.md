@@ -67,20 +67,6 @@ git push -u origin main
 3. In the environment variables panel, set `VITE_ECOMMERCE_WORKFLOW_MANAGEMENT_API` to your API url.
 4. Click **Deploy** — deployment starts.
 
-```bash
-node seed.js
-```
-
-This creates 12 sample products and an admin account:
-- **Email**: `admin@shopvibe.com`
-- **Password**: `admin123`
-
-*(Change this password after first login via the database or add a change-password route.)*
-
-Your app is now live at `https://shopvibe.onrender.com` (or your custom domain).
-
----
-
 ## Run Locally
 
 ```bash
