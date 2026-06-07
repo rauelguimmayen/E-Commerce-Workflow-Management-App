@@ -1,5 +1,5 @@
 <script setup>
-import { reactive, watch } from 'vue';
+import { reactive, watch, computed } from 'vue';
 import api from '../api.js';
 import ProductCard from '../components/ProductCard.vue';
 import UserView from '../components/UserView.vue';
@@ -11,7 +11,7 @@ const productId = route.params.id;
 
 const { user } = useGlobalStore();
 const products = reactive({ data: [] });
-
+const id = computed(() => route.params?.id || route.params?.productId || props.productId)
 const fetchProducts = async () => {
     if (user.isAdmin) {
         let { data } = await api.get('/products/all');
@@ -66,3 +66,8 @@ const handleToggleAvailability = async ({ id, isActive }) => {
         <UserView v-if="!user.isAdmin" :productsData="products.data" />
     </div>
 </template>
+<style>
+    .container {
+        padding-top: 80px;
+    }
+</style>

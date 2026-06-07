@@ -76,9 +76,9 @@ export const useGlobalStore = defineStore('global', () => {
 
 
 })
-state: () => ({
+/*state: () => ({
   showResetModal: false, 
 
-})
+})*/
 
 

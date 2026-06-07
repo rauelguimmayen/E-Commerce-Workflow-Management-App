@@ -8,7 +8,6 @@ import 'bootstrap/dist/js/bootstrap.bundle.min.js';
 import 'bootstrap-icons/font/bootstrap-icons.css'
 import LoginPage from './pages/LoginPage.vue';
 import HomePage from './pages/HomePage.vue';
-import ProductsCatalogue from './pages/ProductsCatalogue.vue';
 import Logout from './pages/Logout.vue';
 import RegisterPage from './pages/RegisterPage.vue';
 import Product from './pages/Product.vue';
@@ -16,6 +15,7 @@ import ProductDetails from './pages/ProductDetails.vue';
 import 'notyf/notyf.min.css';
 import CartViewPage from './pages/CartViewPage.vue';
 import AddProduct from './pages/AddProduct.vue';
+import ProductUpdate from './pages/ProductUpdate.vue';
 import OrdersPage from './pages/OrdersPage.vue';
 import MyOrder from './pages/MyOrder.vue';
 import ProfilePage from './pages/ProfilePage.vue';
@@ -58,6 +58,11 @@ const router = createRouter({
                         path: '/addProduct',
                         name: 'AddProduct',
                         component: AddProduct
+                },
+                {
+                        path: '/products/:id/update',
+                        name: 'ProductUpdate',
+                        component: ProductUpdate
                 },
                 {
                         path: '/orders',
