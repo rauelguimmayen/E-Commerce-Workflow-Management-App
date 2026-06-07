@@ -47,6 +47,7 @@
           <thead>
             <tr>
               <th>Product</th>
+              <th>Featured</th>
               <th>Price</th>
               <th>Status</th>
               <th>Actions</th>
@@ -66,15 +67,19 @@
                 <div class="gs-prod-cell">
                   <div class="gs-prod-thumb">
                     <img
-                      :src="product.imageUrl || `https://placehold.co/100x100/1e1b4b/818cf8?font=raleway&text=${encodeURIComponent((product.name||'P').slice(0,2))}`"
+                      :src="product.image_url || `https://placehold.co/100x100/1e1b4b/818cf8?font=raleway&text=${encodeURIComponent((product.name||'P').slice(0,2))}`"
                       :alt="product.name"
                     />
                   </div>
                   <div>
                     <p class="gs-prod-name">{{ product.name }}</p>
-                    <p class="gs-prod-id">#{{ (product._id || '').slice(-8).toUpperCase() }}</p>
+                    <p class="gs-prod-id">Category:{{ product.category }}</p>
                   </div>
                 </div>
+              </td>
+              <td>
+              <i v-if="product.is_featured" class="bi bi-star-fill text-warning"></i>
+              <i v-if="!product.is_featured" class="bi bi-star text-white-50"></i>
               </td>
               <td>
                 <span class="gs-prod-price">₱{{ product.price?.toLocaleString() }}</span>
@@ -162,7 +167,7 @@ onMounted(fetchProducts)
 
 .gs-admin-wrap {
   font-family: 'DM Sans', sans-serif;
-  padding: 90px 0 60px;
+  padding: 60px 0 60px;
   min-height: 100vh;
   background: #08080f;
 }
@@ -194,7 +199,7 @@ onMounted(fetchProducts)
 
 /* Table Wrap */
 .gs-admin-table-wrap {
-  max-width: 1200px; margin: 0 auto; padding: 0 24px;
+  max-width: 1400px; margin: 0 auto;
   background: #0f0f18;
   border: 1px solid rgba(255,255,255,0.07);
   border-radius: 20px; overflow: hidden;

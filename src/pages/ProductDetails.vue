@@ -1,5 +1,5 @@
 <template>
-  <div class="gs-detail-page" v-if="product">
+  <div class="gs-detail-page" v-if="product && product._id">
     <div class="gs-detail-inner">
       <!-- Breadcrumb -->
       <nav class="gs-breadcrumb">
@@ -74,7 +74,6 @@
               Back
             </router-link>
           </div>
-
           <!-- Features -->
           <div class="gs-detail-features">
             <div class="gs-detail-feature">

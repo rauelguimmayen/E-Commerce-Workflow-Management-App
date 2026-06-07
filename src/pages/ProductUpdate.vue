@@ -97,7 +97,25 @@
             />
             <span v-if="errors.image_url" class="error-msg">{{ errors.image_url }}</span>
           </div>
-
+          <div class="field">
+            <label class="label">Visibility</label>
+            <div class="toggle-group">
+              <label class="toggle-item">
+                <div class="toggle-wrap">
+                  <input type="checkbox" v-model="form.isActive" class="toggle-input" />
+                  <span class="toggle-slider"></span>
+                </div>
+                <span class="toggle-label">Active (visible in store)</span>
+              </label>
+              <label class="toggle-item">
+                <div class="toggle-wrap">
+                  <input type="checkbox" v-model="form.is_featured" class="toggle-input" />
+                  <span class="toggle-slider"></span>
+                </div>
+                <span class="toggle-label">Featured on homepage</span>
+              </label>
+            </div>
+          </div>
           <!-- Submit feedback -->
           <Transition name="fade">
             <div v-if="submitError" class="alert alert--error">⚠ {{ submitError }}</div>
@@ -136,7 +154,7 @@ const router = useRouter()
 
 const id = computed(() => props.productId || route.params?.productId || route.params?.id)
 
-const form = reactive({ name: '', description: '', price: '', category: '', image_url: '' })
+const form = reactive({ name: '', description: '', price: '', category: '', image_url: '', isActive: true, is_featured: false })
 const errors   = reactive({})
 let original   = null
 
@@ -153,7 +171,7 @@ async function fetchProduct() {
   try {
     const { data } = await api.get(`/products/${id.value}`)
     const product  = data.result ?? data
-    original = { name: product.name, description: product.description, price: product.price, category: product.category, image_url: product.image_url}
+    original = { name: product.name, description: product.description, price: product.price, category: product.category, image_url: product.image_url, isActive: product.isActive, is_featured: product.is_featured}
     Object.assign(form, original)
   } catch (e) {
     fetchError.value = e.response?.data?.error ?? e.message ?? 'Failed to load product.'
@@ -198,7 +216,9 @@ async function handleSubmit() {
         description: form.description,
         category: form.category,
         image_url: form.image_url || undefined,
-        price: Number(form.price)
+        price: Number(form.price),
+        isActive: form.isActive,
+        is_featured: form.is_featured
       })
     submitSuccess.value = true
     original = { ...form }
@@ -461,13 +481,64 @@ select.input {
   background-position: right 14px center;
   padding-right: 36px;
   cursor: pointer;
-
 }
 
 select.input option {
   background: #0f0f18;
   color: #f0f0f5;
   width: 75%;
+}
+.toggle-group {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.toggle-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  cursor: pointer;
+}
+.toggle-wrap {
+  position: relative;
+  width: 40px;
+  height: 22px;
+  flex-shrink: 0;
+}
+.toggle-input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+  position: absolute;
+}
+.toggle-slider {
+  position: absolute;
+  inset: 0;
+  background: rgba(255,255,255,0.1);
+  border: 1px solid rgba(255,255,255,0.15);
+  border-radius: 100px;
+  transition: all 0.2s;
+}
+.toggle-slider::after {
+  content: '';
+  position: absolute;
+  width: 16px; height: 16px;
+  left: 2px; top: 2px;
+  background: rgba(255,255,255,0.4);
+  border-radius: 50%;
+  transition: all 0.2s;
+}
+.toggle-input:checked + .toggle-slider {
+  background: rgba(79,110,247,0.3);
+  border-color: #4f6ef7;
+}
+.toggle-input:checked + .toggle-slider::after {
+  transform: translateX(18px);
+  background: #4f6ef7;
+}
+.toggle-label {
+  font-size: 0.875rem;
+  color: #8b92b8;
 }
 /* ── Transitions ── */
 .fade-enter-active, .fade-leave-active { transition: opacity 0.3s, transform 0.3s; }

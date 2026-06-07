@@ -4,7 +4,9 @@ import ProductCard from '../components/ProductCard.vue'
 import api from '../api.js'
 
 const products = ref([])
-const featuredProducts = computed(() => products.value.slice(0, 4))
+const featuredProducts = computed(() => 
+  products.value.filter(p => p.is_featured)
+)
 
 onMounted(async () => {
   try {

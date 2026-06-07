@@ -120,7 +120,7 @@ npm run dev
 ### Products
 | Method | Endpoint | Auth | Description |
 |--------|----------|------|-------------|
-| GET | `/products` | — | List active products (`?category=&featured=&search=&sort=&limit=`) |
+| GET | `/products/active` | — | List active products  |
 | GET | `/products/all` | Admin | All products incl. inactive |
 | GET | `/products/:productId` | — | Single product |
 | POST | `/products/` | Admin | Create product |
@@ -135,18 +135,18 @@ npm run dev
 ### Cart
 | Method | Endpoint | Auth | Description |
 |--------|----------|------|-------------|
-| GET | `/cart` | Bearer | Get cart |
-| POST | `/cart` | Bearer | Add/increment item |
-| PUT | `/cart/:id` | Bearer | Update quantity |
-| DELETE | `/cart/:id` | Bearer | Remove item |
-| DELETE | `/cart` | Bearer | Clear cart |
+| GET    | `/cart/get-cart` | Bearer | Get cart |
+| POST   | `/cart/add-to-cart` | Bearer | Add/increment item |
+| PATCH  | `/cart/update-cart-quantity` | Bearer | Update quantity |
+| PATCH  | `/cart/:productId/remove-from-cart` | Bearer | Remove item |
+| PUT    | `/cart/clear-cart` | Bearer | Clear cart |
 
 ### Orders
 | Method | Endpoint | Auth | Description |
 |--------|----------|------|-------------|
-| GET | `/orders/my` | Bearer | User's orders |
-| POST | `/orders` | Bearer | Place order |
-| GET | `/orders` | Admin | All orders |
+| GET | `/orders/my-orders` | Bearer | User's orders |
+| POST| `/orders/checkout` | Bearer | Place order |
+| GET | `/orders/all-orders` | Admin | All orders |
 | PUT | `/orders/:id/status` | Admin | Update status |
 | GET | `/orders/stats/summary` | Admin | Revenue stats |
 
