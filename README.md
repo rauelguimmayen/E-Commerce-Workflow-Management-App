@@ -95,7 +95,7 @@ npm run dev
 
 ## API Reference
 
-### Auth
+### Users
 | Method | Endpoint | Auth   | Description |
 |--------|----------|--------|-------------|
 | POST   | `/users/register` | — | Register new user |
@@ -117,7 +117,6 @@ npm run dev
 | PATCH | `/products/:productId/archive` | archive product |
 | PATCH | `/products/:productId/activate` | activate product |
 
-
 ### Cart
 | Method | Endpoint | Auth | Description |
 |--------|----------|------|-------------|
@@ -134,7 +133,6 @@ npm run dev
 | POST| `/orders/checkout` | Bearer | Place order |
 | GET | `/orders/all-orders` | Admin | All orders |
 | PUT | `/orders/:id/status` | Admin | Update status |
-| GET | `/orders/stats/summary` | Admin | Revenue stats |
 
 ---
 
