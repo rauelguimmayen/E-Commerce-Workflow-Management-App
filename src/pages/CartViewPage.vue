@@ -95,7 +95,7 @@ async function checkout() {
             <!-- Product Image -->
             <div class="gs-item-img">
               <img
-                :src="item.productId?.imageUrl || `https://placehold.co/200x200/1e1b4b/818cf8?font=raleway&text=${encodeURIComponent((item.productId?.name || 'P').slice(0,2))}`"
+                :src="item.productId?.image_url || `https://placehold.co/200x200/1e1b4b/818cf8?font=raleway&text=${encodeURIComponent((item.productId?.name || 'P').slice(0,2))}`"
                 :alt="item.productId?.name"
               />
             </div>
