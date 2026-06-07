@@ -1,4 +1,4 @@
-# GlobalCArt
+# GlobalCart
 
 A front-end e-commerce app built with **Vue JS** , deployable to **Vercel** in minutes.
 
