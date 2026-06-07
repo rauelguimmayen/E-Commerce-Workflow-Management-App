@@ -88,7 +88,6 @@ npm run dev
 
 | Variable | Required | Description |
 |----------|----------|-------------|
-| `PORT` | No | Defaults to `5173` locally; Render sets this automatically |
 | `VITE_ECOMMERCE_WORKFLOW_MANAGEMENT_API` | **Yes** | API connection string |
 
 ---
@@ -112,10 +111,10 @@ npm run dev
 | POST | `/products/` | Admin | Create product |
 | PUT | `/products/:productId/update` | Admin | Update product |
 | DELETE | `/products/:productId/delete` | Admin | Delete product |
-| POST | `/products/search-by-price` | search product by price|
-| POST | `/products/search-by-name` | search product by name |
-| PATCH | `/products/:productId/archive` | archive product |
-| PATCH | `/products/:productId/activate` | activate product |
+| POST | `/products/search-by-price` | — |search product by price|
+| POST | `/products/search-by-name` | — |search product by name |
+| PATCH | `/products/:productId/archive` | Admin |archive product |
+| PATCH | `/products/:productId/activate` | Admin |activate product |
 
 ### Cart
 | Method | Endpoint | Auth | Description |
