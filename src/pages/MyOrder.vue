@@ -40,7 +40,6 @@
                 <span class="gs-status-dot"></span>
                 {{ statusMap[order.status]?.label || order.status }}
               </span>
-              <p class="gs-order-id">#{{ order._id?.slice(-8).toUpperCase() }}</p>
             </div>
             <div class="gs-order-head-right">
               <p class="gs-order-total">₱{{ order.totalPrice?.toLocaleString() }}</p>
@@ -57,10 +56,10 @@
             >
               <div class="gs-order-item-img">
                 <img
-                  :src="item.product_image || `https://placehold.co/200x200/1e1b4b/818cf8?font=raleway&text=${encodeURIComponent((item.productId?.name || 'P').slice(0,2))}`"
-                  :alt="item.productId?.name"
-                  width="52" height="52"
-                />
+                      :src="item.productId?.image_url || `https://placehold.co/200x200/1e1b4b/818cf8?font=raleway&text=${encodeURIComponent((item.productId?.name || 'P').slice(0,2))}`"
+                      :alt="item.productId?.name"
+                      width="52" height="52"
+                    />
               </div>
               <div class="gs-order-item-info">
                 <p class="gs-order-item-name">{{ item.productId?.name || 'Unknown Product' }}</p>
@@ -98,8 +97,11 @@ const formatDate = (d) => d ? new Date(d).toLocaleDateString('en-US', { month: '
 onMounted(async () => {
   try {
     const { data } = await api.get('/orders/my-orders');
-    orders.value = data;
-  } catch { } finally { loading.value = false }
+    orders.value = data.orders ?? data
+  } catch (e) { 
+  } finally { 
+    loading.value = false 
+  }
 })
 </script>
 
