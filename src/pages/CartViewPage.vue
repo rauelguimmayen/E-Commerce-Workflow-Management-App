@@ -103,7 +103,7 @@ async function checkout() {
             <!-- Product Info -->
             <div class="gs-item-info">
               <h4 class="gs-item-name">{{ item.productId?.name || 'Unknown Product' }}</h4>
-              <p class="gs-item-id">#{{ (item.productId?._id || '').slice(-8).toUpperCase() }}</p>
+              <p class="gs-item-id">Category:{{ product.category }}</p>
               <span class="gs-item-unit-price">₱{{ item.productId?.price?.toLocaleString() }} each</span>
             </div>
 
