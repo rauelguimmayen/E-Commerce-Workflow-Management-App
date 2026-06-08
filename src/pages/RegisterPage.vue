@@ -14,7 +14,7 @@ const confirmPassword = ref("");
 const isEnabled = ref(false);
 const showPassword = ref(false);
 const showConfirm = ref(false);
-
+const props = defineProps({ isModal: Boolean })
 const notyf = new Notyf();
 const router = useRouter();
 const { user } = useGlobalStore();
@@ -61,22 +61,12 @@ onBeforeMount(() => {
 </script>
 
 <template>
-  <div class="gs-auth-wrap">
-    <div class="gs-auth-bg">
-      <div class="gs-auth-orb-1"></div>
-      <div class="gs-auth-orb-2"></div>
-      <div class="gs-auth-grid"></div>
-    </div>
-
-    <div class="gs-auth-card">
+<div :class="isModal ? '' : 'gs-page-wrapper'">
+      <!-- Logo -->
       <div class="gs-auth-logo">
-        <div class="gs-auth-logo-icon">
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-            <path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/>
-            <line x1="3" y1="6" x2="21" y2="6"/>
-            <path d="M16 10a4 4 0 01-8 0"/>
-          </svg>
-        </div>
+        <span class="gs-brand-icon">
+          <img src="/darkglobalcart.png" alt="GlobalShop" width="60" height="60" style="object-fit: contain;" />
+        </span>
         <span class="gs-auth-logo-text">Global<span>Shop</span></span>
       </div>
 
@@ -85,7 +75,7 @@ onBeforeMount(() => {
 
       <form id="registercard" @submit="handleSubmit" class="gs-auth-form">
         <!-- Name Row -->
-        <div class="gs-field-row">
+        <div class="gs-field-row" @submit="handleSubmit">
           <div class="gs-field">
             <label class="gs-label">First Name</label>
             <input id="fName" type="text" class="gs-input" placeholder="John" v-model="firstName" />
@@ -95,7 +85,7 @@ onBeforeMount(() => {
             <input id="lName" type="text" class="gs-input" placeholder="Doe" v-model="lastName" />
           </div>
         </div>
-
+        <div class="gs-field-row">
         <div class="gs-field">
           <label class="gs-label">Mobile Number</label>
           <div class="gs-input-wrap">
@@ -111,7 +101,7 @@ onBeforeMount(() => {
             <input id="emailInput" type="email" class="gs-input" placeholder="you@example.com" v-model="email" />
           </div>
         </div>
-
+        </div>
         <div class="gs-field">
           <label class="gs-label">Password</label>
           <div class="gs-input-wrap">
@@ -152,7 +142,8 @@ onBeforeMount(() => {
         Already have an account?
         <router-link to="/login" class="gs-auth-link">Sign in →</router-link>
       </p>
-    </div>
+    
+  
   </div>
 </template>
 
@@ -189,19 +180,8 @@ onBeforeMount(() => {
   background-size: 60px 60px;
 }
 
-.gs-auth-card {
-  position: relative; z-index: 1;
-  background: #0f0f18 !important;
-  border: 1px solid rgba(255,255,255,0.08);
-  border-radius: 24px;
-  padding: 44px;
-  width: 100%; max-width: 480px;
-  box-shadow: 0 40px 100px rgba(0,0,0,0.5);
-  animation: fadeUp 0.5s ease both;
-}
-
 #registercard{
-  background: #0f0f18 !important;
+  background: transparent; /*#0f0f18 !important;*/
   border: none;
 }
 @keyframes fadeUp {
@@ -212,12 +192,7 @@ onBeforeMount(() => {
 .gs-auth-logo {
   display: flex; align-items: center; gap: 10px; margin-bottom: 28px;
 }
-.gs-auth-logo-icon {
-  width: 40px; height: 40px;
-  background: linear-gradient(135deg, #6366f1, #8b5cf6);
-  border-radius: 11px;
-  display: flex; align-items: center; justify-content: center; color: white;
-}
+
 .gs-auth-logo-text {
   font-family: 'Syne', sans-serif; font-size: 1.1rem; font-weight: 800; color: #f0f0f5;
 }
@@ -232,9 +207,9 @@ onBeforeMount(() => {
   font-size: 0.87rem; color: rgba(255,255,255,0.35); margin: 0 0 28px;
 }
 
-.gs-auth-form { display: flex; flex-direction: column; gap: 16px; }
+.gs-auth-form { display: flex; flex-direction: column; gap: 16px;}
 
-.gs-field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.gs-field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px;}
 
 .gs-field { display: flex; flex-direction: column; gap: 6px; }
 .gs-label {

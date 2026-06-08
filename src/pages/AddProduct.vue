@@ -6,7 +6,7 @@ import api from '../api.js'
 
 const router = useRouter()
 const notyf = new Notyf()
-
+const props = defineProps({ isModal: Boolean })
 const name = ref('')
 const description = ref('')
 const category = ref('')
@@ -41,9 +41,7 @@ async function handleSubmit() {
 </script>
 
 <template>
-  <div class="gs-addprod-page">
-    <div class="gs-addprod-inner">
-
+<div id="addproductmodal" :class="isModal ? '' : 'gs-page-wrapper'">
       <!-- Header -->
       <div class="gs-addprod-header">
         <router-link to="/products" class="gs-back-link">
@@ -56,7 +54,6 @@ async function handleSubmit() {
 
       <div class="gs-addprod-layout">
         <!-- Form -->
-        <div class="gs-addprod-form-card">
           <form @submit.prevent="handleSubmit">
 
             <div class="gs-field">
@@ -84,6 +81,7 @@ async function handleSubmit() {
                 required
               ></textarea>
             </div>
+            <div class="gs-field-row">
             <div class="gs-field">
                 <label class="gs-label">
                   Category <span class="gs-required">*</span>
@@ -112,7 +110,7 @@ async function handleSubmit() {
                 />
               </div>
             </div>
-
+            </div>
             <div class="gs-field">
               <label class="gs-label">Image URL <span class="gs-optional">(optional)</span></label>
               <div class="gs-input-with-icon">
@@ -136,8 +134,6 @@ async function handleSubmit() {
             </div>
 
           </form>
-        </div>
-
         <!-- Preview -->
         <div class="gs-addprod-preview">
           <p class="gs-preview-label">Live Preview</p>
@@ -162,19 +158,11 @@ async function handleSubmit() {
           </div>
         </div>
       </div>
-    </div>
-  </div>
+</div>  
 </template>
 
 <style scoped>
 @import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap');
-
-.gs-addprod-page {
-  min-height: 100vh; background: #08080f;
-  padding: 90px 0 60px;
-  font-family: 'DM Sans', sans-serif; color: #f0f0f5;
-}
-.gs-addprod-inner { max-width: 1000px; margin: 0 auto; padding: 0 24px; }
 
 .gs-addprod-header { margin-bottom: 36px; }
 .gs-back-link {
@@ -202,7 +190,7 @@ async function handleSubmit() {
   display: flex; flex-direction: column; gap: 22px;
 }
 .gs-addprod-form-card form { display: flex; flex-direction: column; gap: 22px; }
-
+.gs-field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
 /* Fields */
 .gs-field { display: flex; flex-direction: column; gap: 8px; }
 .gs-label {

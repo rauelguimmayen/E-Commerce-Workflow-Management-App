@@ -1,6 +1,5 @@
 <template>
-  <div class="gs-detail-page" v-if="product && product._id">
-    <div class="gs-detail-inner">
+<div id="prod_details" :class="isModal ? '' : 'gs-page-wrapper'" v-if="product && product._id">
       <!-- Breadcrumb -->
       <nav class="gs-breadcrumb">
         <router-link to="/" class="gs-breadcrumb-link">Home</router-link>
@@ -90,12 +89,12 @@
             </div>
           </div>
         </div>
-      </div>
-    </div>
   </div>
+  </div> 
   <div v-else class="gs-detail-loading">
     <div class="gs-spinner"></div>
   </div>
+ 
 </template>
 
 <script setup>
@@ -107,7 +106,7 @@ import { useGlobalStore } from '../stores/global.js';
 const route = useRoute();
 const product = ref(null);
 const quantity = ref(1);
-
+const props = defineProps({ isModal: Boolean })
 const notyf = new Notyf();
 const isLoggedIn = ref(!!localStorage.getItem('token'));
 const { user } = useGlobalStore();
@@ -137,19 +136,6 @@ async function addToCart() {
 
 <style scoped>
 @import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap');
-
-.gs-detail-page {
-  min-height: 100vh;
-  background: #08080f;
-  padding: 90px 0 60px;
-  font-family: 'DM Sans', sans-serif;
-  color: #f0f0f5;
-}
-.gs-detail-inner {
-  max-width: 1100px;
-  margin: 0 auto;
-  padding: 0 24px;
-}
 
 /* Breadcrumb */
 .gs-breadcrumb {

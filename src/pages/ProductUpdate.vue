@@ -1,23 +1,19 @@
 <template>
-  <div class="update-page">
+<div id="updatemodal" :class="isModal ? '' : 'gs-page-wrapper'">
     <div class="page-bg">
       <div class="bg-circle bg-circle--1"></div>
       <div class="bg-circle bg-circle--2"></div>
     </div>
-
-    <div class="container">
       <!-- Back -->
       <button class="back-btn" @click="router.back()">
         <span class="back-arrow">&#8592;</span> Back
       </button>
 
-      <div class="card">
         <!-- Header -->
         <div class="card-header">
           <div class="header-icon">✦</div>
           <div>
             <h1 class="card-title">Update Product</h1>
-            <p class="card-sub">ID: <span class="product-id">{{ productId }}</span></p>
           </div>
         </div>
 
@@ -59,31 +55,32 @@
               placeholder="Describe the product…"
             ></textarea>
           </div>
-          <div class="field">
-                <label class="label">Category</label>
-                <select class="input" v-model="form.category">
-                <option value="" disabled>Select a category</option>
-                <option v-for="cat in categories" :key="cat" :value="cat">
-                  {{ cat.charAt(0).toUpperCase() + cat.slice(1) }}
-                </option>
-              </select>
-          </div>
-          <div class="field" :class="{ 'field--error': errors.price }">
-            <label class="label" for="price">Price (₱)</label>
-            <div class="input-wrap">
-              <span class="input-prefix">₱</span>
-              <input
-                id="price"
-                v-model="form.price"
-                class="input input--prefixed"
-                type="number"
-                min="0"
-                step="0.01"
-                placeholder="0.00"
-                @input="clearError('price')"
-              />
+          <div class="gs-field-row">
+            <div class="gs-field">
+                  <label class="label">Category</label>
+                  <select class="input" v-model="form.category">
+                  <option value="" disabled>Select a category</option>
+                  <option v-for="cat in categories" :key="cat" :value="cat">
+                    {{ cat.charAt(0).toUpperCase() + cat.slice(1) }}
+                  </option>
+                </select>
+             </div>   
+            <div class="gs-field">    
+                <label class="gs-label" for="price">Price (₱)</label>
+                <div class="input-wrap">
+                  <span class="input-prefix">₱</span>
+                  <input
+                    id="price"
+                    v-model="form.price"
+                    class="input input--prefixed"
+                    type="number"
+                    min="0"
+                    step="0.01"
+                    placeholder="0.00"
+                    @input="clearError('price')"
+                  />
+                </div>
             </div>
-            <span v-if="errors.price" class="error-msg">{{ errors.price }}</span>
           </div>
           <div class="field" :class="{ 'field--error': errors.name }">
             <label class="label" for="name">Product Image</label>
@@ -132,9 +129,7 @@
             </button>
           </div>
         </form>
-      </div>
-    </div>
-  </div>
+ </div>  
 </template>
 
 <script setup>
@@ -143,6 +138,7 @@ import { useRoute, useRouter } from 'vue-router'
 import api from '../api.js' 
 
 const props = defineProps({
+  isModal: Boolean,  
   productId: {
     type: String,
     default: null
@@ -236,20 +232,6 @@ onMounted(fetchProduct)
 <style scoped>
 @import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap');
 
-/* ── Root ── */
-.update-page {
-  min-height: 100vh;
-  background: #0c0f1a;
-  font-family: 'DM Sans', sans-serif;
-  color: #e8eaf0;
-  display: flex;
-  align-items: flex-start;
-  justify-content: center;
-  padding: 10px 16px 80px;
-  position: relative;
-  overflow: hidden;
-}
-
 /* ── Background blobs ── */
 .page-bg { position: fixed; inset: 0; pointer-events: none; z-index: 0; }
 .bg-circle {
@@ -269,14 +251,6 @@ onMounted(fetchProduct)
   bottom: -80px; right: -100px;
 }
 
-/* ── Container ── */
-.container {
-  position: relative;
-  z-index: 1;
-  width: 100%;
-  max-width: 520px;
-}
-
 /* ── Back button ── */
 .back-btn {
   display: inline-flex;
@@ -294,15 +268,6 @@ onMounted(fetchProduct)
 }
 .back-btn:hover { color: #e8eaf0; }
 .back-arrow { font-size: 1rem; }
-
-/* ── Card ── */
-.card {
-  background: rgba(255,255,255,0.04);
-  border: 1px solid rgba(255,255,255,0.09);
-  border-radius: 20px;
-  padding: 40px 36px;
-  backdrop-filter: blur(20px);
-}
 
 /* ── Card header ── */
 .card-header {
@@ -362,6 +327,15 @@ onMounted(fetchProduct)
 @keyframes spin { to { transform: rotate(360deg); } }
 
 /* ── Form ── */
+
+.gs-field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+
+.gs-field { display: flex; flex-direction: column; gap: 6px; }
+.gs-label {
+  font-size: 0.78rem; font-weight: 600; color: rgba(255,255,255,0.5);
+  font-family: 'Syne', sans-serif; letter-spacing: 0.02em;
+}
+
 .form { display: flex; flex-direction: column; gap: 24px; }
 
 .field { display: flex; flex-direction: column; gap: 8px; }
@@ -490,8 +464,9 @@ select.input option {
 }
 .toggle-group {
   display: flex;
-  flex-direction: column;
-  gap: 12px;
+  flex-direction: row;
+  gap: 24px;
+  flex-wrap: wrap;
 }
 .toggle-item {
   display: flex;

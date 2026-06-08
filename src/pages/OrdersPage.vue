@@ -28,7 +28,7 @@
           <table class="gs-orders-table">
             <thead>
               <tr>
-                <th>Order ID</th>
+                <!-- <th>Order ID</th> -->
                 <th>Customer</th>
                 <th>Items</th>
                 <th>Total</th>
@@ -42,9 +42,9 @@
               </tr>
               <tr v-for="order in orders" :key="order._id">
                 <!-- Order ID -->
-                <td>
+                <!-- <td>
                   <span class="gs-order-id-mono">#{{ order._id?.slice(-8).toUpperCase() }}</span>
-                </td>
+                </td> -->
 
                 <!-- Customer -->
                 <td>
@@ -65,7 +65,7 @@
                   <div class="gs-items-cell" v-if="order.productsOrdered?.length">
                     <div v-for="(item, i) in order.productsOrdered.slice(0, 2)" :key="item._id" class="gs-item-row">
                       <img
-                        :src="item.product_image || `https://placehold.co/80x80/1e1b4b/818cf8?font=raleway&text=${encodeURIComponent((item.productId?.name||'P').slice(0,2))}`"
+                        :src="item.productId?.image_url || `https://placehold.co/80x80/1e1b4b/818cf8?font=raleway&text=${encodeURIComponent((item.productId?.name||'P').slice(0,2))}`"
                         class="gs-item-thumb"
                         width="32" height="32"
                       />

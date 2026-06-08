@@ -8,7 +8,7 @@ import api from '../api.js';
 const notyf = new Notyf();
 const router = useRouter();
 const { getUserDetails, user } = useGlobalStore();
-
+const props = defineProps({ isModal: Boolean })
 const email = ref("");
 const password = ref("");
 const isEnabled = ref(false);
@@ -48,23 +48,12 @@ onBeforeMount(() => {
 </script>
 
 <template>
-  <div class="gs-auth-wrap">
-    <div class="gs-auth-bg">
-      <div class="gs-auth-orb-1"></div>
-      <div class="gs-auth-orb-2"></div>
-      <div class="gs-auth-grid"></div>
-    </div>
-
-    <div class="gs-auth-card">
+<div id="loginmodal" :class="isModal ? '' : 'gs-page-wrapper'">
       <!-- Logo -->
       <div class="gs-auth-logo">
-        <div class="gs-auth-logo-icon">
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-            <path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/>
-            <line x1="3" y1="6" x2="21" y2="6"/>
-            <path d="M16 10a4 4 0 01-8 0"/>
-          </svg>
-        </div>
+        <span class="gs-brand-icon">
+          <img src="/darkglobalcart.png" alt="GlobalShop" width="60" height="60" style="object-fit: contain;" />
+        </span>
         <span class="gs-auth-logo-text">Global<span>Shop</span></span>
       </div>
 
@@ -121,8 +110,7 @@ onBeforeMount(() => {
         Don't have an account?
         <router-link to="/register" class="gs-auth-link">Create one →</router-link>
       </p>
-    </div>
-  </div>
+  </div>  
 </template>
 
 <style scoped>
@@ -139,7 +127,6 @@ onBeforeMount(() => {
   font-family: 'DM Sans', sans-serif;
   overflow: hidden;
 }
-
 /* Background */
 .gs-auth-bg { position: absolute; inset: 0; z-index: 0; }
 .gs-auth-orb-1 {
@@ -169,19 +156,6 @@ onBeforeMount(() => {
   background-size: 60px 60px;
 }
 
-/* Card */
-.gs-auth-card {
-  position: relative;
-  z-index: 1;
-  background: #0f0f18;
-  border: 1px solid rgba(255,255,255,0.08);
-  border-radius: 24px;
-  padding: 48px 44px;
-  width: 100%;
-  max-width: 420px;
-  box-shadow: 0 40px 100px rgba(0,0,0,0.5);
-  animation: fadeUp 0.5s ease both;
-}
 @keyframes fadeUp {
   from { opacity: 0; transform: translateY(20px); }
   to { opacity: 1; transform: translateY(0); }

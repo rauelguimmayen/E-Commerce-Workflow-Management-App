@@ -21,18 +21,19 @@ import MyOrder from './pages/MyOrder.vue';
 import ProfilePage from './pages/ProfilePage.vue';
 import ResetPassword from './pages/ResetPassword.vue';
 
+const modalRoutes = ['LoginPage', 'RegisterPage', 'ResetPassword', 'AddProduct', 'ProductDetails', 'ProductUpdate']
 const router = createRouter({
         history: createWebHistory(),
         routes: [
                 {
                         path: '/',
                         name: 'Home',
-                        component: HomePage
+                        components: { default: HomePage }
                 },
                 {
                         path: '/login',
                         name: 'Login',
-                        component: LoginPage
+                        components: { modal: LoginPage }                          
                 },
                 {
                         path: '/profile',
@@ -42,7 +43,7 @@ const router = createRouter({
                 {
                         path: '/resetPassword',
                         name: 'ResetPassword',
-                        component: ResetPassword
+                        components: { modal: ResetPassword }
                 },
                 {
                         path: '/products',
@@ -52,17 +53,17 @@ const router = createRouter({
                 {
                         path: '/products/:id',
                         name: 'ProductDetails',
-                        component: ProductDetails
+                        components: { modal: ProductDetails }
                 },
                 {
                         path: '/addProduct',
                         name: 'AddProduct',
-                        component: AddProduct
+                        components: { modal: AddProduct }
                 },
                 {
                         path: '/products/:id/update',
                         name: 'ProductUpdate',
-                        component: ProductUpdate
+                        components: { modal: ProductUpdate }
                 },
                 {
                         path: '/orders',
@@ -82,7 +83,7 @@ const router = createRouter({
                 {
                         path: '/register',
                         name: 'Register',
-                        component: RegisterPage
+                        components: { modal: RegisterPage }
                 },
                 {
                         path: '/cart',

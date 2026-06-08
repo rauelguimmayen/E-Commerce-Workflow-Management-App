@@ -170,6 +170,7 @@ onMounted(fetchProducts)
   padding: 60px 0 60px;
   min-height: 100vh;
   background: #08080f;
+  border-radius: 20px;
 }
 
 /* Stats */

@@ -9,7 +9,7 @@ const confirmPassword = ref('')
 const isLoading = ref(false)
 const showNew = ref(false)
 const showConfirm = ref(false)
-
+const props = defineProps({ isModal: Boolean })
 const passwordMatch = ref(true)
 
 function checkMatch() {
@@ -39,9 +39,8 @@ async function handleReset() {
 </script>
 
 <template>
-  <div class="gs-reset-page">
-    <div class="gs-reset-inner">
-      <div class="gs-reset-card">
+  <!-- <div class="modal-box" :style="{ maxWidth: modalWidth }"> -->
+    <div :class="isModal ? '' : 'gs-page-wrapper'">
         <div class="gs-reset-icon">
           <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
         </div>
@@ -90,28 +89,11 @@ async function handleReset() {
             {{ isLoading ? 'Updating...' : 'Update Password' }}
           </button>
         </form>
-      </div>
-    </div>
-  </div>
+ </div> 
 </template>
 
 <style scoped>
 @import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap');
-
-.gs-reset-page {
-  min-height: 100vh; background: #08080f;
-  display: flex; align-items: center; justify-content: center;
-  padding: 80px 20px;
-  font-family: 'DM Sans', sans-serif;
-}
-.gs-reset-inner { width: 100%; max-width: 420px; }
-.gs-reset-card {
-  background: #0f0f18;
-  border: 1px solid rgba(255,255,255,0.08);
-  border-radius: 24px; padding: 44px;
-  box-shadow: 0 40px 80px rgba(0,0,0,0.4);
-  animation: fadeUp 0.4s ease both;
-}
 @keyframes fadeUp {
   from { opacity: 0; transform: translateY(16px); }
   to { opacity: 1; transform: translateY(0); }
