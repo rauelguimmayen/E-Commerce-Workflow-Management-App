@@ -20,6 +20,9 @@
             />
             <div class="gs-detail-img-badge">{{ product.category }}</div>
           </div>
+            <p class="gs-detail-desc">{{ product.description }}</p>
+            <span class="gs-detail-price">₱{{ product.price?.toLocaleString() }}</span>
+            <span class="gs-detail-price-note">Free shipping available</span>
         </div>
 
         <!-- Info -->
@@ -35,14 +38,7 @@
           </router-link>
           </div>
           <h1 class="gs-detail-name">{{ product.name }}</h1>
-          <p class="gs-detail-desc">{{ product.description }}</p>
-
-          <!-- Price -->
-          <div class="gs-detail-price-row">
-            <span class="gs-detail-price">₱{{ product.price?.toLocaleString() }}</span>
-            <span class="gs-detail-price-note">Free shipping available</span>
-          </div>
-
+          
           <!-- Quantity -->
           <div class="gs-detail-qty-section">
             <label class="gs-detail-qty-label">Quantity</label>
@@ -220,13 +216,9 @@ async function addToCart() {
 .gs-detail-desc {
   font-size: 0.92rem; color: rgba(255,255,255,0.45);
   line-height: 1.7; margin: 0 0 28px;
+  padding-top: 20px;
 }
 
-/* Price */
-.gs-detail-price-row {
-  display: flex; align-items: baseline; gap: 14px;
-  margin-bottom: 28px;
-}
 .gs-detail-price {
   font-family: 'Syne', sans-serif;
   font-size: 2rem; font-weight: 800;
@@ -234,6 +226,7 @@ async function addToCart() {
 }
 .gs-detail-price-note {
   font-size: 0.78rem; color: #34d399; font-weight: 500;
+  padding-left: 10px;
 }
 
 /* Qty */
