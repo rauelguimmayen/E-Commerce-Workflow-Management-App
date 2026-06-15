@@ -11,7 +11,7 @@
         <!-- Overlay Actions -->
         <div class="gs-product-overlay" :class="{ visible: hovered }">
           <router-link
-            v-if="!store.user.isAdmin"
+            v-if="store.user.email"
             class="gs-overlay-btn"
             :to="'/products/' + productData._id"
             title="View Product"
@@ -19,15 +19,6 @@
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
             Quick View
           </router-link>
-          <button
-            v-if="store.user.email && !store.user.isAdmin"
-            class="gs-overlay-btn gs-overlay-cart"
-            @click="addToCart"
-            title="Add to Cart"
-          >
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 001.99 1.61h9.72a2 2 0 001.99-1.61L23 6H6"/></svg>
-            Add to Cart
-          </button>
         </div>
         <!-- Category Badge (placeholder) -->
         <span class="gs-product-badge">New</span>
@@ -45,13 +36,6 @@
         <div class="gs-product-footer">
           <span class="gs-product-price">₱{{ productData.price?.toLocaleString() }}</span>
           <div class="gs-product-actions">
-            <router-link
-              v-if="!store.user.isAdmin"
-              class="gs-action-btn"
-              :to="'/products/' + productData._id"
-            >
-              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
-            </router-link>
             <button
               v-if="store.user.email && !store.user.isAdmin"
               class="gs-action-btn gs-action-primary"

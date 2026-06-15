@@ -52,9 +52,9 @@ onBeforeMount(() => {
       <!-- Logo -->
       <div class="gs-auth-logo">
         <span class="gs-brand-icon">
-          <img src="/darkglobalcart.png" alt="GlobalShop" width="60" height="60" style="object-fit: contain;" />
+          <img src="/darkglobalcart.png" alt="GlobalCart" width="60" height="60" style="object-fit: contain;" />
         </span>
-        <span class="gs-auth-logo-text">Global<span>Shop</span></span>
+        <span class="gs-auth-logo-text">Global<span>Cart</span></span>
       </div>
 
       <h1 class="gs-auth-title">Welcome back</h1>
