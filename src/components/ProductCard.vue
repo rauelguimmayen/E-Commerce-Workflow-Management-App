@@ -11,7 +11,6 @@
         <!-- Overlay Actions -->
         <div class="gs-product-overlay" :class="{ visible: hovered }">
           <router-link
-            v-if="store.user.email"
             class="gs-overlay-btn"
             :to="'/products/' + productData._id"
             title="View Product"
