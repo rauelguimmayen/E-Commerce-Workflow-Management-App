@@ -20,7 +20,7 @@ async function handleUpdate() {
     if (firstName.value) payload.firstName = firstName.value
     if (lastName.value) payload.lastName = lastName.value
     if (mobileNo.value) payload.mobileNo = mobileNo.value
-    await api.patch('/users/update-profile', payload)
+    await api.put('/users/update-profile', payload)
     notyf.success('Profile updated successfully!')
     firstName.value = ''; lastName.value = ''; mobileNo.value = ''
   } catch (e) {
