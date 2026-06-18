@@ -1,5 +1,5 @@
 <script setup>
-import { ref, watch, onMounted, onBeforeMount } from 'vue';
+import { watch, ref, onBeforeMount } from 'vue';
 import { Notyf } from 'notyf';
 import { useRouter } from 'vue-router';
 import { useGlobalStore } from '../stores/global.js';
@@ -17,81 +17,23 @@ const showConfirm = ref(false);
 defineProps({ isModal: Boolean });
 const notyf = new Notyf();
 const router = useRouter();
-const { user, getUserDetails } = useGlobalStore();
+const { user } = useGlobalStore();
 
 const passwordMatch = ref(true);
-const googleLoading = ref(false);
-const googleError = ref('');
 
 watch([email, password, confirmPassword, firstName, lastName, mobileNum], (currentValue) => {
   passwordMatch.value = currentValue[1] === currentValue[2] || currentValue[2] === "";
   isEnabled.value = currentValue.every(input => input !== "") && currentValue[1] === currentValue[2];
 });
 
-// ── Google Sign-Up ────────────────────────────────────────────────────────
-
-function loadGoogleScript() {
-  if (window.google?.accounts?.id) {
-    initGoogleClient();
+const googleSignup = () => {
+  const apiBase = import.meta.env.VITE_ECOMMERCE_WORKFLOW_MANAGEMENT_API;
+  if (!apiBase) {
+    notyf.error('Google sign-up is not configured. Please contact support.');
     return;
   }
-  const script = document.createElement('script');
-  script.src = 'https://accounts.google.com/gsi/client';
-  script.async = true;
-  script.defer = true;
-  script.onload = initGoogleClient;
-  script.onerror = () => {
-    googleError.value = 'Google Sign-In is not available right now.';
-  };
-  document.head.appendChild(script);
-}
-
-function initGoogleClient() {
-  const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
-  if (!clientId) {
-    googleError.value = 'Google Sign-In is not configured (missing client ID).';
-    return;
-  }
-  google.accounts.id.initialize({
-    client_id: clientId,
-    callback: handleGoogleCredential,
-    auto_select: false
-  });
-}
-
-function handleGoogleSignUp() {
-  googleError.value = '';
-  if (!window.google?.accounts?.id) {
-    googleError.value = 'Google Sign-In is not available. Please ensure pop-ups are allowed.';
-    return;
-  }
-  google.accounts.id.prompt((notification) => {
-    if (notification.isNotDisplayed() || notification.isSkippedMoment()) {
-      googleError.value = 'Google sign-up was cancelled or blocked. Please try again.';
-    }
-  });
-}
-
-async function handleGoogleCredential(response) {
-  googleLoading.value = true;
-  googleError.value = '';
-  try {
-    const res = await api.post('/users/google', { credential: response.credential });
-    if (res.data.access) {
-      notyf.success('Account created! Welcome to GlobalCart.');
-      localStorage.setItem('token', res.data.access);
-      getUserDetails(res.data.access);
-      router.push({ path: '/' });
-    }
-  } catch (e) {
-    console.error(e);
-    googleError.value = e.response?.data?.message || 'Google sign-up failed. Please try again.';
-  } finally {
-    googleLoading.value = false;
-  }
-}
-
-// ── Email/password registration ─────────────────────────────────────────
+  window.location.href = `${apiBase}/users/google`;
+};
 
 async function handleSubmit(e) {
   e.preventDefault();
@@ -125,10 +67,6 @@ async function handleSubmit(e) {
 onBeforeMount(() => {
   if (user.email) router.push({ path: '/' });
 });
-
-onMounted(() => {
-  loadGoogleScript();
-});
 </script>
 
 <template>
@@ -141,18 +79,16 @@ onMounted(() => {
         <span class="gs-auth-logo-text">Global<span>Cart</span></span>
       </div>
       <!-- Google Sign-Up Button -->
-      <button class="btn-google" id="google-btn" type="button" @click="handleGoogleSignUp" :disabled="googleLoading">
-        <span v-if="googleLoading" class="gs-spinner"></span>
-        <svg v-else width="20" height="20" viewBox="0 0 48 48">
+      <button class="btn-google" id="google-btn" type="button" @click="googleSignup">
+        <svg width="20" height="20" viewBox="0 0 48 48">
           <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/>
           <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/>
           <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/>
           <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.18 1.48-4.97 2.31-8.16 2.31-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/>
           <path fill="none" d="M0 0h48v48H0z"/>
         </svg>
-        {{ googleLoading ? 'Creating account…' : 'Sign up with Google' }}
+        Sign up with Google
       </button>
-      <p v-if="googleError" class="gs-field-error gs-google-error">{{ googleError }}</p>
 
       <div class="divider-text">or sign up with email</div>
       <h1 class="gs-auth-title">Create account</h1>
@@ -315,18 +251,6 @@ onMounted(() => {
     }
 .btn-google:hover { box-shadow: 0 2px 8px rgba(0,0,0,.12); border-color: #c5c5c5; }
 .btn-google:disabled { opacity: .6; cursor: not-allowed; }
-.gs-spinner {
-  width: 16px; height: 16px;
-  border: 2px solid rgba(60,64,67,0.25);
-  border-top-color: #3c4043;
-  border-radius: 50%;
-  animation: gs-spin 0.7s linear infinite;
-}
-@keyframes gs-spin { to { transform: rotate(360deg); } }
-.gs-google-error {
-  text-align: center;
-  margin: -4px 0 4px;
-}
 .divider-text {
       display: flex; align-items: center; gap: 12px; color: #adb5bd;
       font-size: .8rem; letter-spacing: .05em; text-transform: uppercase; margin: 20px 0;

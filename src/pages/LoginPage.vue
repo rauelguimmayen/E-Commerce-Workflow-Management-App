@@ -72,7 +72,7 @@ async function handleGoogleCredential(response) {
   googleLoading.value = true;
   googleError.value = '';
   try {
-    const res = await api.post('/users/google', { credential: response.credential });
+    const res = await api.get('/users/google', { credential: response.credential });
     if (res.data.access) {
       notyf.success('Account created! Welcome to GlobalCart.');
       localStorage.setItem('token', res.data.access);
