@@ -1,5 +1,5 @@
 <script setup>
-import { ref, watch, onMounted, onBeforeMount } from 'vue';
+import { watch, ref, onBeforeMount } from 'vue';
 import { Notyf } from 'notyf';
 import { useRouter } from 'vue-router';
 import { useGlobalStore } from '../stores/global';
@@ -8,97 +8,84 @@ import api from '../api.js';
 const notyf = new Notyf();
 const router = useRouter();
 const { getUserDetails, user } = useGlobalStore();
-
-defineProps({ isModal: Boolean });
-
-const email = ref('');
-const password = ref('');
+const props = defineProps({ isModal: Boolean })
+const email = ref("");
+const password = ref("");
 const isEnabled = ref(false);
 const showPassword = ref(false);
-const googleLoading = ref(false);
-const googleError = ref('');
 
 watch([email, password], (currentValue) => {
-  isEnabled.value = currentValue.every(input => input !== '');
+  isEnabled.value = currentValue.every(input => input !== "");
 });
 
-// --- Google Sign-In ---
-
-function loadGoogleScript() {
-  if (window.google?.accounts?.id) {
-    initGoogleClient();
-    return;
-  }
-  const script = document.createElement('script');
-  script.src = 'https://accounts.google.com/gsi/client';
-  script.async = true;
-  script.defer = true;
-  script.onload = initGoogleClient;
-  script.onerror = () => {
-    googleError.value = 'Google Sign-In is not available right now.';
-  };
-  document.head.appendChild(script);
-}
-
-function initGoogleClient() {
-  const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
-  if (!clientId) {
-    googleError.value = 'Google Sign-In is not configured (missing client ID).';
-    return;
-  }
-  google.accounts.id.initialize({
-    client_id: clientId,
-    callback: handleGoogleCredential,
-    auto_select: false
-  });
-}
-
-function handleGoogleSignIn() {
-  googleError.value = '';
-  if (!window.google?.accounts?.id) {
-    googleError.value = 'Google Sign-In is not available. Please ensure pop-ups are allowed.';
-    return;
-  }
-  google.accounts.id.prompt((notification) => {
-    if (notification.isNotDisplayed() || notification.isSkippedMoment()) {
-      googleError.value = 'Google sign-in was cancelled or blocked. Please try again.';
+export default {
+  name: 'LoginModal',
+  props: {
+    isModal: { type: Boolean, default: false }
+  },
+  data() {
+    return {
+      email: '',
+      password: '',
+      showPassword: false,
+      googleClient: null
     }
-  });
-}
-
-async function handleGoogleCredential(response) {
-  googleLoading.value = true;
-  googleError.value = '';
-  try {
-    const res = await api.post('/users/google', { credential: response.credential });
-    if (res.data.access) {
-      notyf.success('Welcome back!');
-      localStorage.setItem('token', res.data.access);
-      getUserDetails(res.data.access);
-      router.push({ path: '/' });
+  },
+  computed: {
+    isEnabled() {
+      return this.email.trim() !== '' && this.password.trim() !== ''
     }
-  } catch (e) {
-    console.error(e);
-    googleError.value = e.response?.data?.message || 'Google sign-in failed. Please try again.';
-  } finally {
-    googleLoading.value = false;
-  }
-}
-
-// --- Email/password login ---
-
-async function handleSubmit() {
+  },
+  mounted() {
+    this.loadGoogleScript()
+  },
+  methods: {
+    loadGoogleScript() {
+      if (window.google?.accounts?.oauth2) {
+        this.initGoogleClient()
+        return
+      }
+      const script = document.createElement('script')
+      script.src = 'https://accounts.google.com/gsi/client'
+      script.async = true
+      script.defer = true
+      script.onload = this.initGoogleClient
+      document.head.appendChild(script)
+    },
+    initGoogleClient() {
+      this.googleClient = google.accounts.oauth2.initTokenClient({
+        client_id: 'YOUR_GOOGLE_CLIENT_ID.apps.googleusercontent.com',
+        scope: 'profile email',
+        callback: this.handleGoogleResponse
+      })
+      document.getElementById('google-btn').addEventListener('click', () => {
+        this.googleClient.requestAccessToken()
+      })
+    },
+    async handleGoogleResponse(tokenResponse) {
+      if (tokenResponse.error) {
+        console.error('Google sign-in failed:', tokenResponse.error)
+        return
+      }
+      const res = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
+        headers: { Authorization: `Bearer ${tokenResponse.access_token}` }
+      })
+      const profile = await res.json() // { email, name, picture, sub, ... }
+      // Send profile + access token to your backend to create/verify the session
+      this.$emit('google-login', profile)
+    },
+  async handleSubmit() {
   try {
-    const res = await api.post('/users/login', {
+    let res = await api.post('/users/login', {
       email: email.value,
       password: password.value
     });
     if (res.data.access) {
-      notyf.success('Welcome back!');
-      localStorage.setItem('token', res.data.access);
+      notyf.success("Welcome back!");
+      localStorage.setItem("token", res.data.access);
       getUserDetails(res.data.access);
-      email.value = '';
-      password.value = '';
+      email.value = "";
+      password.value = "";
       router.push({ path: '/' });
     }
   } catch (e) {
@@ -106,17 +93,15 @@ async function handleSubmit() {
       notyf.error(e.response.data.message);
     } else {
       console.error(e);
-      notyf.error('Login failed. Please try again.');
+      notyf.error("Login failed. Please try again.");
     }
   }
 }
+}
+  }
 
 onBeforeMount(() => {
   if (user.token) router.push({ path: '/' });
-});
-
-onMounted(() => {
-  loadGoogleScript();
 });
 </script>
 
@@ -130,18 +115,16 @@ onMounted(() => {
         <span class="gs-auth-logo-text">Global<span>Cart</span></span>
       </div>
       <!-- Google Sign-In Button -->
-      <button class="btn-google" id="google-btn" type="button" @click="handleGoogleSignIn" :disabled="googleLoading">
-        <span v-if="googleLoading" class="gs-spinner"></span>
-        <svg v-else width="20" height="20" viewBox="0 0 48 48">
+      <button class="btn-google" id="google-btn" type="button">
+        <svg width="20" height="20" viewBox="0 0 48 48">
           <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/>
           <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/>
           <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/>
           <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.18 1.48-4.97 2.31-8.16 2.31-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/>
           <path fill="none" d="M0 0h48v48H0z"/>
         </svg>
-        {{ googleLoading ? 'Signing in…' : 'Continue with Google' }}
+        Continue with Google
       </button>
-      <p v-if="googleError" class="gs-field-error gs-google-error">{{ googleError }}</p>
 
       <div class="divider-text">or sign in with email</div>
       <h1 class="gs-auth-title">Welcome back</h1>
@@ -264,18 +247,6 @@ onMounted(() => {
 .btn-google:hover { box-shadow: 0 2px 8px rgba(0,0,0,.12); border-color: #c5c5c5; }
 .btn-google:disabled { opacity: .6; cursor: not-allowed; }
 .btn-google svg { flex-shrink: 0; }
-.gs-spinner {
-  width: 16px; height: 16px;
-  border: 2px solid rgba(60,64,67,0.25);
-  border-top-color: #3c4043;
-  border-radius: 50%;
-  animation: gs-spin 0.7s linear infinite;
-}
-@keyframes gs-spin { to { transform: rotate(360deg); } }
-.gs-google-error {
-  text-align: center;
-  margin: -4px 0 4px;
-}
 /* Logo */
 .gs-auth-logo {
   display: flex;

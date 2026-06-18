@@ -78,7 +78,7 @@ function closeModal() { router.back() }
   border-radius: 20px;
   max-height: 90vh;
   overflow-y: auto;
-  padding: 36px;
+  padding: 20px;
 }
 
 .modal-close {
