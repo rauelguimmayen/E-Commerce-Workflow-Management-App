@@ -2,27 +2,33 @@
 import { ref, watch, onMounted, onBeforeMount } from 'vue';
 import { Notyf } from 'notyf';
 import { useRouter } from 'vue-router';
-import { useGlobalStore } from '../stores/global';
+import { useGlobalStore } from '../stores/global.js';
 import api from '../api.js';
 
-const notyf = new Notyf();
-const router = useRouter();
-const { getUserDetails, user } = useGlobalStore();
-
-defineProps({ isModal: Boolean });
-
-const email = ref('');
-const password = ref('');
+const firstName = ref("");
+const lastName = ref("");
+const mobileNum = ref("");
+const email = ref("");
+const password = ref("");
+const confirmPassword = ref("");
 const isEnabled = ref(false);
 const showPassword = ref(false);
+const showConfirm = ref(false);
+defineProps({ isModal: Boolean });
+const notyf = new Notyf();
+const router = useRouter();
+const { user, getUserDetails } = useGlobalStore();
+
+const passwordMatch = ref(true);
 const googleLoading = ref(false);
 const googleError = ref('');
 
-watch([email, password], (currentValue) => {
-  isEnabled.value = currentValue.every(input => input !== '');
+watch([email, password, confirmPassword, firstName, lastName, mobileNum], (currentValue) => {
+  passwordMatch.value = currentValue[1] === currentValue[2] || currentValue[2] === "";
+  isEnabled.value = currentValue.every(input => input !== "") && currentValue[1] === currentValue[2];
 });
 
-// --- Google Sign-In ---
+// ── Google Sign-Up ────────────────────────────────────────────────────────
 
 function loadGoogleScript() {
   if (window.google?.accounts?.id) {
@@ -53,17 +59,13 @@ function initGoogleClient() {
   });
 }
 
-function handleGoogleSignIn() {
+function handleGoogleSignUp() {
   googleError.value = '';
   if (!window.google?.accounts?.id) {
     googleError.value = 'Google Sign-In is not available. Please ensure pop-ups are allowed.';
     return;
   }
-  google.accounts.id.prompt((notification) => {
-    if (notification.isNotDisplayed() || notification.isSkippedMoment()) {
-      googleError.value = 'Google sign-in was cancelled or blocked. Please try again.';
-    }
-  });
+  google.accounts.id.prompt();
 }
 
 async function handleGoogleCredential(response) {
@@ -72,47 +74,52 @@ async function handleGoogleCredential(response) {
   try {
     const res = await api.post('/users/google', { credential: response.credential });
     if (res.data.access) {
-      notyf.success('Welcome back!');
+      notyf.success('Account created! Welcome to GlobalCart.');
       localStorage.setItem('token', res.data.access);
       getUserDetails(res.data.access);
       router.push({ path: '/' });
     }
   } catch (e) {
     console.error(e);
-    googleError.value = e.response?.data?.message || 'Google sign-in failed. Please try again.';
+    googleError.value = e.response?.data?.message || 'Google sign-up failed. Please try again.';
   } finally {
     googleLoading.value = false;
   }
 }
 
-// --- Email/password login ---
+// ── Email/password registration ─────────────────────────────────────────
 
-async function handleSubmit() {
+async function handleSubmit(e) {
+  e.preventDefault();
   try {
-    const res = await api.post('/users/login', {
+    let response = await api.post('/users/register', {
+      firstName: firstName.value,
+      lastName: lastName.value,
       email: email.value,
+      mobileNo: mobileNum.value,
       password: password.value
     });
-    if (res.data.access) {
-      notyf.success('Welcome back!');
-      localStorage.setItem('token', res.data.access);
-      getUserDetails(res.data.access);
-      email.value = '';
-      password.value = '';
-      router.push({ path: '/' });
+    if (response.status === 201) {
+      notyf.success(response.data.message);
+      firstName.value = ""; lastName.value = "";
+      mobileNum.value = ""; email.value = "";
+      password.value = ""; confirmPassword.value = "";
+      router.push({ path: '/login' });
+    } else {
+      notyf.error("Registration failed. Please contact admin.");
     }
-  } catch (e) {
-    if (e.response?.status === 401) {
+  } catch(e) {
+    if ([404,401,400,409].includes(e.response?.status)) {
       notyf.error(e.response.data.message);
     } else {
       console.error(e);
-      notyf.error('Login failed. Please try again.');
+      notyf.error("Registration failed. Please contact admin.");
     }
   }
 }
 
 onBeforeMount(() => {
-  if (user.token) router.push({ path: '/' });
+  if (user.email) router.push({ path: '/' });
 });
 
 onMounted(() => {
@@ -121,7 +128,7 @@ onMounted(() => {
 </script>
 
 <template>
-<div id="loginmodal" :class="isModal ? '' : 'gs-page-wrapper'">
+<div :class="isModal ? '' : 'gs-page-wrapper'">
       <!-- Logo -->
       <div class="gs-auth-logo">
         <span class="gs-brand-icon">
@@ -129,8 +136,8 @@ onMounted(() => {
         </span>
         <span class="gs-auth-logo-text">Global<span>Cart</span></span>
       </div>
-      <!-- Google Sign-In Button -->
-      <button class="btn-google" id="google-btn" type="button" @click="handleGoogleSignIn" :disabled="googleLoading">
+      <!-- Google Sign-Up Button -->
+      <button class="btn-google" id="google-btn" type="button" @click="handleGoogleSignUp" :disabled="googleLoading">
         <span v-if="googleLoading" class="gs-spinner"></span>
         <svg v-else width="20" height="20" viewBox="0 0 48 48">
           <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/>
@@ -139,40 +146,48 @@ onMounted(() => {
           <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.18 1.48-4.97 2.31-8.16 2.31-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/>
           <path fill="none" d="M0 0h48v48H0z"/>
         </svg>
-        {{ googleLoading ? 'Signing in…' : 'Continue with Google' }}
+        {{ googleLoading ? 'Creating account…' : 'Sign up with Google' }}
       </button>
       <p v-if="googleError" class="gs-field-error gs-google-error">{{ googleError }}</p>
 
-      <div class="divider-text">or sign in with email</div>
-      <h1 class="gs-auth-title">Welcome back</h1>
-      <p class="gs-auth-subtitle">Sign in to continue to your account</p>
+      <div class="divider-text">or sign up with email</div>
+      <h1 class="gs-auth-title">Create account</h1>
+      <p class="gs-auth-subtitle">Join thousands of happy customers</p>
 
-      <form @submit.prevent="handleSubmit" class="gs-auth-form">
+      <form id="registercard" @submit="handleSubmit" class="gs-auth-form">
+        <!-- Name Row -->
+        <div class="gs-field-row">
+          <div class="gs-field">
+            <label class="gs-label">First Name</label>
+            <input id="fName" type="text" class="gs-input" placeholder="John" v-model="firstName" />
+          </div>
+          <div class="gs-field">
+            <label class="gs-label">Last Name</label>
+            <input id="lName" type="text" class="gs-input" placeholder="Doe" v-model="lastName" />
+          </div>
+        </div>
+        <div class="gs-field-row">
         <div class="gs-field">
-          <label class="gs-label">Email Address</label>
+          <label class="gs-label">Mobile Number</label>
           <div class="gs-input-wrap">
-            <svg class="gs-input-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
-            <input
-              id="userEmail"
-              type="email"
-              class="gs-input"
-              placeholder="you@example.com"
-              v-model="email"
-            />
+            <svg class="gs-input-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013 6.18a2 2 0 012-2.18h3a2 2 0 012 1.72 12.84 12.84 0 00.7 2.81 2 2 0 01-.45 2.11L9.91 10.91a16 16 0 006.18 6.18l1.27-1.27a2 2 0 012.11-.45 12.84 12.84 0 002.81.7A2 2 0 0122 16.92z"/></svg>
+            <input id="mobile" type="tel" class="gs-input" placeholder="09xxxxxxxxx" v-model="mobileNum" />
           </div>
         </div>
 
         <div class="gs-field">
+          <label class="gs-label">Email Address</label>
+          <div class="gs-input-wrap">
+            <svg class="gs-input-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+            <input id="emailInput" type="email" class="gs-input" placeholder="you@example.com" v-model="email" />
+          </div>
+        </div>
+        </div>
+        <div class="gs-field">
           <label class="gs-label">Password</label>
           <div class="gs-input-wrap">
             <svg class="gs-input-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
-            <input
-              id="password"
-              :type="showPassword ? 'text' : 'password'"
-              class="gs-input"
-              placeholder="Your password"
-              v-model="password"
-            />
+            <input id="passwordInput" :type="showPassword ? 'text' : 'password'" class="gs-input" placeholder="Create a strong password" v-model="password" />
             <button type="button" class="gs-input-toggle" @click="showPassword = !showPassword">
               <svg v-if="!showPassword" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
               <svg v-else width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17.94 17.94A10.07 10.07 0 0112 20c-7 0-11-8-11-8a18.45 18.45 0 015.06-5.94M9.9 4.24A9.12 9.12 0 0112 4c7 0 11 8 11 8a18.5 18.5 0 01-2.16 3.19m-6.72-1.07a3 3 0 11-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
@@ -180,24 +195,37 @@ onMounted(() => {
           </div>
         </div>
 
+        <div class="gs-field">
+          <label class="gs-label">Confirm Password</label>
+          <div class="gs-input-wrap">
+            <svg class="gs-input-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+            <input id="cpasswordInput" :type="showConfirm ? 'text' : 'password'" class="gs-input" :class="{ 'gs-input-error': !passwordMatch }" placeholder="Repeat your password" v-model="confirmPassword" />
+            <button type="button" class="gs-input-toggle" @click="showConfirm = !showConfirm">
+              <svg v-if="!showConfirm" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+              <svg v-else width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17.94 17.94A10.07 10.07 0 0112 20c-7 0-11-8-11-8a18.45 18.45 0 015.06-5.94M9.9 4.24A9.12 9.12 0 0112 4c7 0 11 8 11 8a18.5 18.5 0 01-2.16 3.19m-6.72-1.07a3 3 0 11-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
+            </button>
+          </div>
+          <span class="gs-field-error" v-if="!passwordMatch">Passwords don't match</span>
+        </div>
+
         <button
-          id="loginBtn"
           type="submit"
           class="gs-submit-btn"
           :class="{ disabled: !isEnabled }"
           :disabled="!isEnabled"
         >
-          <span v-if="isEnabled">Sign In</span>
-          <span v-else>Enter email & password to continue</span>
+          <span>Create Account</span>
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
         </button>
       </form>
 
       <p class="gs-auth-footer">
-        Don't have an account?
-        <router-link to="/register" class="gs-auth-link">Create one →</router-link>
+        Already have an account?
+        <router-link to="/login" class="gs-auth-link">Sign in →</router-link>
       </p>
-  </div>  
+    
+  
+  </div>
 </template>
 
 <style scoped>
@@ -214,56 +242,75 @@ onMounted(() => {
   font-family: 'DM Sans', sans-serif;
   overflow: hidden;
 }
-/* Background */
 .gs-auth-bg { position: absolute; inset: 0; z-index: 0; }
 .gs-auth-orb-1 {
-  position: absolute;
-  width: 600px; height: 600px;
+  position: absolute; width: 600px; height: 600px;
   background: radial-gradient(circle, #6366f1, transparent 70%);
-  top: -200px; left: -200px;
-  opacity: 0.1;
-  filter: blur(80px);
-  border-radius: 50%;
+  top: -200px; right: -100px; opacity: 0.08; filter: blur(80px); border-radius: 50%;
 }
 .gs-auth-orb-2 {
-  position: absolute;
-  width: 400px; height: 400px;
+  position: absolute; width: 400px; height: 400px;
   background: radial-gradient(circle, #8b5cf6, transparent 70%);
-  bottom: -100px; right: -100px;
-  opacity: 0.1;
-  filter: blur(80px);
-  border-radius: 50%;
+  bottom: -100px; left: -100px; opacity: 0.1; filter: blur(80px); border-radius: 50%;
 }
 .gs-auth-grid {
-  position: absolute;
-  inset: 0;
+  position: absolute; inset: 0;
   background-image:
     linear-gradient(rgba(99,102,241,0.04) 1px, transparent 1px),
     linear-gradient(90deg, rgba(99,102,241,0.04) 1px, transparent 1px);
   background-size: 60px 60px;
 }
 
+#registercard{
+  background: transparent; /*#0f0f18 !important;*/
+  border: none;
+}
 @keyframes fadeUp {
   from { opacity: 0; transform: translateY(20px); }
   to { opacity: 1; transform: translateY(0); }
 }
-.divider-text {
-  display: flex; align-items: center; gap: 12px; color: #adb5bd;
-  font-size: .8rem; letter-spacing: .05em; text-transform: uppercase; margin: 20px 0;
+
+.gs-auth-logo {
+  display: flex; align-items: center; gap: 10px; margin-bottom: 28px;
 }
-.divider-text::before, .divider-text::after {
-  content: ''; flex: 1; height: 1px; background: #e9ecef;
+
+.gs-auth-logo-text {
+  font-family: 'Syne', sans-serif; font-size: 1.1rem; font-weight: 800; color: #f0f0f5;
+}
+.gs-auth-logo-text span { color: #818cf8; }
+
+.gs-auth-title {
+  font-family: 'Syne', sans-serif;
+  font-size: 1.7rem; font-weight: 800;
+  color: #f0f0f5; margin: 0 0 6px; letter-spacing: -0.02em;
+}
+.gs-auth-subtitle {
+  font-size: 0.87rem; color: rgba(255,255,255,0.35); margin: 0 0 28px;
+}
+
+.gs-auth-form { display: flex; flex-direction: column; gap: 16px;}
+
+.gs-field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px;}
+
+.gs-field { display: flex; flex-direction: column; gap: 6px; }
+.gs-label {
+  font-size: 0.78rem; font-weight: 600; color: rgba(255,255,255,0.5);
+  font-family: 'Syne', sans-serif; letter-spacing: 0.02em;
+}
+
+.gs-input-wrap { position: relative; display: flex; align-items: center; }
+.gs-input-icon {
+  position: absolute; left: 13px; color: rgba(255,255,255,0.22); pointer-events: none;
 }
 .btn-google {
-  display: flex; align-items: center; justify-content: center; gap: 10px;
-  width: 100%; padding: 12px; border: 1.5px solid #e0e0e0;
-  border-radius: 10px; background: #fff; color: #3c4043;
-  font-weight: 600; font-size: .9rem; cursor: pointer;
-  transition: box-shadow .2s, border-color .2s;
-}
+      display: flex; align-items: center; justify-content: center; gap: 10px;
+      width: 100%; padding: 12px; border: 1.5px solid #e0e0e0;
+      border-radius: 10px; background: #fff; color: #3c4043;
+      font-weight: 600; font-size: .9rem; cursor: pointer;
+      transition: box-shadow .2s, border-color .2s;
+    }
 .btn-google:hover { box-shadow: 0 2px 8px rgba(0,0,0,.12); border-color: #c5c5c5; }
 .btn-google:disabled { opacity: .6; cursor: not-allowed; }
-.btn-google svg { flex-shrink: 0; }
 .gs-spinner {
   width: 16px; height: 16px;
   border: 2px solid rgba(60,64,67,0.25);
@@ -276,141 +323,76 @@ onMounted(() => {
   text-align: center;
   margin: -4px 0 4px;
 }
-/* Logo */
-.gs-auth-logo {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  margin-bottom: 32px;
-}
-.gs-auth-logo-icon {
-  width: 40px; height: 40px;
-  background: linear-gradient(135deg, #6366f1, #8b5cf6);
-  border-radius: 11px;
-  display: flex; align-items: center; justify-content: center;
-  color: white;
-}
-.gs-auth-logo-text {
-  font-family: 'Syne', sans-serif;
-  font-size: 1.1rem;
-  font-weight: 800;
-  color: #f0f0f5;
-}
-.gs-auth-logo-text span { color: #818cf8; }
-
-.gs-auth-title {
-  font-family: 'Syne', sans-serif;
-  font-size: 1.75rem;
-  font-weight: 800;
-  color: #f0f0f5;
-  margin: 0 0 8px;
-  letter-spacing: -0.02em;
-}
-.gs-auth-subtitle {
-  font-size: 0.88rem;
-  color: rgba(255,255,255,0.38);
-  margin: 0 0 32px;
-}
-
-/* Form */
-.gs-auth-form { display: flex; flex-direction: column; gap: 20px; }
-
-.gs-field { display: flex; flex-direction: column; gap: 7px; }
-
-.gs-label {
-  font-size: 0.8rem;
-  font-weight: 600;
-  color: rgba(255,255,255,0.55);
-  font-family: 'Syne', sans-serif;
-  letter-spacing: 0.02em;
-}
-
-.gs-input-wrap {
-  position: relative;
-  display: flex;
-  align-items: center;
-}
-.gs-input-icon {
-  position: absolute;
-  left: 14px;
-  color: rgba(255,255,255,0.25);
-  pointer-events: none;
-}
+.divider-text {
+      display: flex; align-items: center; gap: 12px; color: #adb5bd;
+      font-size: .8rem; letter-spacing: .05em; text-transform: uppercase; margin: 20px 0;
+    }
+.divider-text::before, .divider-text::after {
+      content: ''; flex: 1; height: 1px; background: #e9ecef;
+    }
 .gs-input {
   width: 100%;
   background: rgba(255,255,255,0.04);
   border: 1px solid rgba(255,255,255,0.09);
-  border-radius: 12px;
-  padding: 13px 14px 13px 42px;
+  border-radius: 11px;
+  padding: 12px 13px;
   color: #f0f0f5;
-  font-size: 0.9rem;
+  font-size: 0.88rem;
   font-family: 'DM Sans', sans-serif;
-  transition: all 0.2s;
-  outline: none;
+  transition: all 0.2s; outline: none;
 }
+/* For fields with icon */
+.gs-input-wrap .gs-input { padding-left: 40px; }
 .gs-input:focus {
   border-color: rgba(99,102,241,0.5);
   background: rgba(99,102,241,0.05);
-  box-shadow: 0 0 0 3px rgba(99,102,241,0.12);
+  box-shadow: 0 0 0 3px rgba(99,102,241,0.1);
 }
-.gs-input::placeholder { color: rgba(255,255,255,0.2); }
+.gs-input::placeholder { color: rgba(255,255,255,0.18); }
+.gs-input-error {
+  border-color: rgba(239,68,68,0.5) !important;
+  box-shadow: 0 0 0 3px rgba(239,68,68,0.1) !important;
+}
+
+.gs-field-error { font-size: 0.75rem; color: #f87171; font-weight: 500; }
 
 .gs-input-toggle {
-  position: absolute;
-  right: 13px;
-  background: none;
-  border: none;
-  color: rgba(255,255,255,0.3);
-  cursor: pointer;
-  padding: 4px;
-  transition: color 0.2s;
+  position: absolute; right: 12px;
+  background: none; border: none; color: rgba(255,255,255,0.3);
+  cursor: pointer; padding: 4px; transition: color 0.2s;
 }
 .gs-input-toggle:hover { color: rgba(255,255,255,0.6); }
 
-/* Submit */
 .gs-submit-btn {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  width: 100%;
-  padding: 14px;
-  margin-top: 8px;
-  border-radius: 12px;
-  border: none;
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+  width: 100%; padding: 14px; margin-top: 6px;
+  border-radius: 12px; border: none;
   background: linear-gradient(135deg, #6366f1, #8b5cf6);
-  color: white;
-  font-family: 'Syne', sans-serif;
-  font-size: 0.92rem;
-  font-weight: 700;
-  cursor: pointer;
+  color: white; font-family: 'Syne', sans-serif;
+  font-size: 0.92rem; font-weight: 700; cursor: pointer;
   transition: all 0.2s;
   box-shadow: 0 8px 24px rgba(99,102,241,0.3);
-  letter-spacing: 0.01em;
 }
 .gs-submit-btn:hover:not(.disabled) {
   transform: translateY(-1px);
   box-shadow: 0 12px 32px rgba(99,102,241,0.4);
 }
 .gs-submit-btn.disabled {
-  background: rgba(255,255,255,0.06);
-  color: rgba(255,255,255,0.2);
-  box-shadow: none;
-  cursor: not-allowed;
+  background: rgba(255,255,255,0.06); color: rgba(255,255,255,0.2);
+  box-shadow: none; cursor: not-allowed;
 }
 
-/* Footer */
 .gs-auth-footer {
-  margin-top: 24px;
-  text-align: center;
-  font-size: 0.85rem;
-  color: rgba(255,255,255,0.3);
+  margin-top: 10px; text-align: center;
+  font-size: 0.85rem; color: rgba(255,255,255,0.3);
 }
 .gs-auth-link {
-  color: #818cf8;
-  font-weight: 600;
-  text-decoration: none;
-  transition: color 0.2s;
+  color: #818cf8; font-weight: 600; text-decoration: none; transition: color 0.2s;
 }
 .gs-auth-link:hover { color: #a5b4fc; }
+
+@media (max-width: 480px) {
+  .gs-auth-card { padding: 32px 24px; }
+  .gs-field-row { grid-template-columns: 1fr; }
+}
 </style>
