@@ -54,7 +54,7 @@ export default {
     },
     initGoogleClient() {
       this.googleClient = google.accounts.oauth2.initTokenClient({
-        client_id: 'YOUR_GOOGLE_CLIENT_ID.apps.googleusercontent.com',
+        client_id: import.meta.env.VITE_GOOGLE_CLIENT_ID;
         scope: 'profile email',
         callback: this.handleGoogleResponse
       })
