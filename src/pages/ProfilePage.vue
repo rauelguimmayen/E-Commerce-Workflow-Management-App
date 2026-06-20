@@ -77,6 +77,24 @@ onBeforeMount(async () => {
               <span class="gs-info-label">Role</span>
               <span class="gs-info-badge-user">Customer</span>
             </div>
+
+            <div class="security-section">
+                  <h5>Security</h5>
+                  <p v-if="!user?.twoFactorEnabled">
+                    Two-factor authentication is currently <strong>disabled</strong>.
+                  </p>
+                  <p v-else>
+                    Two-factor authentication is currently <strong>enabled</strong>.
+                  </p>
+
+                  <router-link
+                    v-if="!user?.twoFactorEnabled"
+                    :to="{ name: 'TwoFactorSetup' }"
+                    class="btn-enable-2fa"
+                  >
+                    Enable Two-Factor Authentication
+                  </router-link>
+                </div>
           </div>
         </div>
 
@@ -146,6 +164,16 @@ onBeforeMount(async () => {
 }
 .gs-profile-section-title svg { color: #6366f1; }
 
+.security-section {
+  font-family: 'Syne', sans-serif; font-size: 0.9rem; font-weight: 700;
+  color: rgba(255,255,255,0.6); margin: 0 0 22px;
+  text-transform: uppercase; letter-spacing: 0.05em;
+}
+.security-section p {
+  font-family: 'Syne', sans-serif; padding: 3px 10px; border-radius: 100px;
+  font-size: 0.7rem;
+  text-decoration: none;
+}
 /* Info Rows */
 .gs-info-rows { display: flex; flex-direction: column; gap: 0; }
 .gs-info-row {

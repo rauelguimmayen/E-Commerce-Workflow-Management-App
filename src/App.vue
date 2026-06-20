@@ -30,7 +30,8 @@ const modalWidths = {
   AddProduct: '800px',
   Login: '480px',
   Register: '600px',
-  ResetPassword: '480px',
+  ResetPassword: '480px'
+  
 }
 const modalWidth = computed(() => modalWidths[route.name] ?? '540px')
 

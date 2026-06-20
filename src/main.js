@@ -7,6 +7,8 @@ import 'bootstrap/dist/css/bootstrap.css';
 import 'bootstrap/dist/js/bootstrap.bundle.min.js';
 import 'bootstrap-icons/font/bootstrap-icons.css'
 import LoginPage from './pages/LoginPage.vue';
+import TwoFactorSetup from './pages/TwoFactorSetup.vue';
+import TwoFactorVerify from './pages/TwoFactorVerify.vue';
 import HomePage from './pages/HomePage.vue';
 import Logout from './pages/Logout.vue';
 import RegisterPage from './pages/RegisterPage.vue';
@@ -20,6 +22,8 @@ import OrdersPage from './pages/OrdersPage.vue';
 import MyOrder from './pages/MyOrder.vue';
 import ProfilePage from './pages/ProfilePage.vue';
 import ResetPassword from './pages/ResetPassword.vue';
+import { useAuthStore } from './stores/auth';
+
 
 const modalRoutes = ['LoginPage', 'RegisterPage', 'ResetPassword', 'AddProduct', 'ProductDetails', 'ProductUpdate']
 const router = createRouter({
@@ -36,9 +40,22 @@ const router = createRouter({
                         components: { modal: LoginPage }                          
                 },
                 {
+                        path: '/2fa-setup',
+                        name: 'TwoFactorSetup',
+                        component: TwoFactorSetup
+                        //meta: { requiresAuth: true }                          
+                },
+                {
+                        path: '/verify-2fa',
+                        name: 'TwoFactorVerify',
+                        component: TwoFactorVerify,
+                        meta: { requires2FAPending: true }                          
+                },
+                {
                         path: '/profile',
                         name: 'ProfilePage',
-                        component: ProfilePage
+                        component: ProfilePage,
+                        //meta: { requiresAuth: true }
                 },
                 {
                         path: '/resetPassword',
@@ -97,7 +114,19 @@ const router = createRouter({
 
         ]
 })
+router.beforeEach((to, from) => {
+  const auth = useAuthStore()
 
+  if (to.meta.requiresAuth && auth.status !== 'authenticated') {
+    return '/login'
+  }
+  if (to.meta.requires2FAPending && auth.status !== 'pending-2fa') {
+    return '/login'   // blocks direct navigation to /verify-2fa unless status is pending-2fa
+  }
+  if (to.path === '/login' && auth.status === 'authenticated') {
+    return { name: 'ProfilePage' }
+  }
+})
 const app = createApp(App);
 app.use(createPinia());
 app.use(router);
