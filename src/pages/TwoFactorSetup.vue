@@ -17,14 +17,18 @@
       <p v-if="error" class="error">{{ error }}</p>
     </div>
     <div v-else-if="step === 'done'">
-      <p>✅ 2FA is now enabled on your account.</p>
-      <div v-if="backupCodes.length">
-        <h4>Save these backup codes somewhere safe:</h4>
-        <ul>
-          <li v-for="code in backupCodes" :key="code">{{ code }}</li>
-        </ul>
+        <p>✅ 2FA is now enabled on your account.</p>
+        <div v-if="backupCodes.length">
+          <h4>Save these backup codes somewhere safe:</h4>
+          <ul>
+            <li v-for="code in backupCodes" :key="code">{{ code }}</li>
+          </ul>
+          <p class="warning">
+            These codes won't be shown again. Store them somewhere safe before continuing.
+          </p>
+        </div>
+        <button @click="finish">I've saved my codes — Done</button>
       </div>
-    </div>
   </div>
   
 </template>
