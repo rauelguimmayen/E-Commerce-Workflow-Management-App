@@ -4,10 +4,10 @@ import { Notyf } from 'notyf';
 import { useRouter } from 'vue-router';
 import { useGlobalStore } from '../stores/global';
 import api from '../api.js';
-import { useAuthStore } from '../stores/auth'
+
 const notyf = new Notyf();
 const router = useRouter();
-const auth = useAuthStore()
+
 const { getUserDetails, user } = useGlobalStore();
 const props = defineProps({ isModal: Boolean })
 const step = ref('credentials')
@@ -24,14 +24,10 @@ watch([email, password], (currentValue) => {
 
   async function handleSubmit() {
   try {
-    const res = await api.post('/users/login', {
-      email: email.value,
-      password: password.value
-    });
+    const res = await api.post('/users/login', { email: email.value, password: password.value });
 
     if (res.data.requires2FA) {
-      auth.tempToken = res.data.tempToken;
-      auth.status = 'pending-2fa';
+      user.tempToken = res.data.tempToken;
       step.value = '2fa';
       return;
     }
@@ -60,13 +56,12 @@ async function handleVerify2FA() {
     const res = await api.post(
       '/2fa/verify',
       { code: code.value },
-      { headers: { Authorization: `Bearer ${auth.tempToken}` } }
+      { headers: { Authorization: `Bearer ${user.tempToken}` } }
     );
     notyf.success("Welcome back!");
     localStorage.setItem("token", res.data.access);
     getUserDetails(res.data.access);
-    auth.status = 'authenticated';
-    auth.tempToken = null;
+    user.tempToken = null;
     router.push({ path: '/' });
   } catch (e) {
     error.value = 'Invalid code. Please try again.';

@@ -7,9 +7,9 @@ import { useGlobalStore } from '../stores/global.js'
 const router = useRouter()
 const store = useGlobalStore()
 
-onMounted(() => {
+onMounted(async () => {
   localStorage.removeItem('token')
-  store.getUserDetails(null)  // ← reuses the existing clear logic in your store
+  await store.getUserDetails(null)   // ✅ wait for the store to actually clear
   router.push({ name: 'Home' })
 })
 </script>

@@ -22,10 +22,10 @@ import OrdersPage from './pages/OrdersPage.vue';
 import MyOrder from './pages/MyOrder.vue';
 import ProfilePage from './pages/ProfilePage.vue';
 import ResetPassword from './pages/ResetPassword.vue';
-import { useAuthStore } from './stores/auth';
+import { useGlobalStore } from './stores/global'
 
 
-const modalRoutes = ['LoginPage', 'RegisterPage', 'ResetPassword', 'AddProduct', 'ProductDetails', 'ProductUpdate']
+const modalRoutes = ['Login', 'Register', 'ResetPassword', 'AddProduct', 'ProductDetails', 'ProductUpdate']
 const router = createRouter({
         history: createWebHistory(),
         routes: [
@@ -115,16 +115,10 @@ const router = createRouter({
         ]
 })
 router.beforeEach((to, from) => {
-  const auth = useAuthStore()
+  const store = useGlobalStore()
 
-  if (to.meta.requiresAuth && auth.status !== 'authenticated') {
+  if (to.meta.requires2FAPending && !store.user.tempToken) {
     return '/login'
-  }
-  if (to.meta.requires2FAPending && auth.status !== 'pending-2fa') {
-    return '/login'   // blocks direct navigation to /verify-2fa unless status is pending-2fa
-  }
-  if (to.path === '/login' && auth.status === 'authenticated') {
-    return { name: 'ProfilePage' }
   }
 })
 const app = createApp(App);
