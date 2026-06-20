@@ -55,7 +55,7 @@ function closeModal() { router.back() }
   <Teleport to="body">
     <Transition name="modal-fade">
       <div v-if="isModal" class="modal-overlay" @click.self="closeModal">
-        <div class="modal-box" :style="{ maxWidth: modalWidth }">
+        <div class="modal-box" :style="{ width: modalWidth, maxWidth: modalWidth }">
           <button class="modal-close" @click="closeModal">✕</button>
           <RouterView name="modal" />
         </div>

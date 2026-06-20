@@ -4,15 +4,19 @@ import { Notyf } from 'notyf';
 import { useRouter } from 'vue-router';
 import { useGlobalStore } from '../stores/global';
 import api from '../api.js';
-
+import { useAuthStore } from '../stores/auth'
 const notyf = new Notyf();
 const router = useRouter();
+const auth = useAuthStore()
 const { getUserDetails, user } = useGlobalStore();
 const props = defineProps({ isModal: Boolean })
+const step = ref('credentials')
 const email = ref("");
 const password = ref("");
 const isEnabled = ref(false);
 const showPassword = ref(false);
+const code = ref('')
+const error = ref('')
 
 watch([email, password], (currentValue) => {
   isEnabled.value = currentValue.every(input => input !== "");
@@ -20,10 +24,18 @@ watch([email, password], (currentValue) => {
 
   async function handleSubmit() {
   try {
-    let res = await api.post('/users/login', {
+    const res = await api.post('/users/login', {
       email: email.value,
       password: password.value
     });
+
+    if (res.data.requires2FA) {
+      auth.tempToken = res.data.tempToken;
+      auth.status = 'pending-2fa';
+      step.value = '2fa';
+      return;
+    }
+
     if (res.data.access) {
       notyf.success("Welcome back!");
       localStorage.setItem("token", res.data.access);
@@ -42,6 +54,25 @@ watch([email, password], (currentValue) => {
   }
 }
 
+async function handleVerify2FA() {
+  error.value = ''
+  try {
+    const res = await api.post(
+      '/2fa/verify',
+      { code: code.value },
+      { headers: { Authorization: `Bearer ${auth.tempToken}` } }
+    );
+    notyf.success("Welcome back!");
+    localStorage.setItem("token", res.data.access);
+    getUserDetails(res.data.access);
+    auth.status = 'authenticated';
+    auth.tempToken = null;
+    router.push({ path: '/' });
+  } catch (e) {
+    error.value = 'Invalid code. Please try again.';
+    notyf.error(error.value);
+  }
+}
 
 onBeforeMount(() => {
   if (user.token) router.push({ path: '/' });
@@ -60,7 +91,7 @@ onBeforeMount(() => {
       <h1 class="gs-auth-title">Welcome back</h1>
       <p class="gs-auth-subtitle">Sign in to continue to your account</p>
 
-      <form @submit.prevent="handleSubmit" class="gs-auth-form">
+      <form v-if="step === 'credentials'" @submit.prevent="handleSubmit" class="gs-auth-form">
         <div class="gs-field">
           <label class="gs-label">Email Address</label>
           <div class="gs-input-wrap">
@@ -93,21 +124,32 @@ onBeforeMount(() => {
           </div>
         </div>
 
-        <button
-          id="loginBtn"
-          type="submit"
-          class="gs-submit-btn"
-          :class="{ disabled: !isEnabled }"
-          :disabled="!isEnabled"
-        >
+        <button id="loginBtn" type="submit" class="gs-submit-btn" :class="{ disabled: !isEnabled }" :disabled="!isEnabled">
           <span v-if="isEnabled">Sign In</span>
           <span v-else>Enter email & password to continue</span>
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
         </button>
       </form>
-
-      <p class="gs-auth-footer">
-        Don't have an account?
+        <div v-else-if="step === '2fa'" class="gs-auth-form">
+            <h3 class="gs-auth-title" style="font-size: 1.2rem;">Enter your authentication code</h3>
+            <div class="gs-field">
+              <input
+                v-model="code"
+                maxlength="6"
+                placeholder="000000"
+                class="gs-input"
+                style="padding-left: 14px; text-align: center; letter-spacing: 0.3em;"
+                @keyup.enter="handleVerify2FA"
+                autofocus
+              />
+            </div>
+                <button class="gs-submit-btn" @click="handleVerify2FA" :disabled="code.length !== 6">
+                  Verify
+                </button>
+                <p v-if="error" class="error" style="color: #ff6b6b; text-align: center;">{{ error }}</p>
+              </div>
+          <p class="gs-auth-footer">
+             Don't have an account?
         <router-link to="/register" class="gs-auth-link">Create one →</router-link>
       </p>
   </div>  
