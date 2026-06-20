@@ -36,14 +36,14 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import api from '../api'
-
+import { useRouter } from 'vue-router'
 const step = ref('qr')
 const qrCodeUrl = ref('')
 const manualSecret = ref('')
 const confirmCode = ref('')
 const backupCodes = ref([])
 const error = ref('')
-
+const router = useRouter()
 onMounted(async () => {
   try {
     const { data } = await api.post('/2fa/init')
@@ -64,6 +64,11 @@ async function confirmSetup() {
     error.value = 'Invalid code. Please try again.'
   }
 }
+
+function finish() {
+  router.push({ name: 'ProfilePage' })
+}
+
 </script>
 
 <style scoped>
