@@ -66,6 +66,7 @@ async function confirmSetup() {
 }
 
 function finish() {
+  getUserDetails(user.token)
   router.push({ name: 'ProfilePage' })
 }
 

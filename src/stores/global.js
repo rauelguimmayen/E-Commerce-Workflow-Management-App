@@ -23,7 +23,7 @@ export const useGlobalStore = defineStore('global', () => {
                         user.firstName = "";
                         user.lastName = "";
                         user.isAdmin = false;
-
+                        user.twoFactorEnabled = false;
                         return;
                 }
 
@@ -35,6 +35,7 @@ export const useGlobalStore = defineStore('global', () => {
                 user.firstName = data.user.firstName;
                 user.lastName = data.user.lastName;
                 user.isAdmin = data.user.isAdmin;
+                user.twoFactorEnabled = data.user.twoFactorEnabled;
         }
 
 

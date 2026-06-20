@@ -3,7 +3,7 @@ import { ref, onBeforeMount } from 'vue';
 import { useRouter } from 'vue-router';
 import { useGlobalStore } from '../stores/global.js';
 import UpdateProfile from '../components/UpdateProfile.vue';
-const { user } = useGlobalStore();
+const { user, getUserDetails  } = useGlobalStore();
 import api from '../api.js';
 const router = useRouter();
 
@@ -18,11 +18,7 @@ onBeforeMount(async () => {
     return;
   }
   try {
-    const response = await api.get('/users/details');
-    firstName.value = response.data.firstName;
-    lastName.value = response.data.lastName;
-    email.value = response.data.email;
-    mobileNum.value = response.data.mobileNo;
+    await getUserDetails(user.token);
   } catch (error) {
     console.error('Failed to fetch user details:', error);
   }
@@ -81,16 +77,16 @@ onBeforeMount(async () => {
             <div class="security-section">
                   <h5>Security</h5>
                   <p v-if="!user?.twoFactorEnabled">
-                    Two-factor authentication is currently <strong>disabled</strong>.
+                    Two-factor authentication is currently <strong id="disabled-2fa">disabled</strong>.
                   </p>
-                  <p v-else>
-                    Two-factor authentication is currently <strong>enabled</strong>.
+                  <p v-else >
+                    Two-factor authentication is currently <strong id="enabled-2fa">enabled</strong>.
                   </p>
 
                   <router-link
                     v-if="!user?.twoFactorEnabled"
                     :to="{ name: 'TwoFactorSetup' }"
-                    class="btn-enable-2fa"
+                    class="btn-link"
                   >
                     Enable Two-Factor Authentication
                   </router-link>
@@ -168,6 +164,7 @@ onBeforeMount(async () => {
   font-family: 'Syne', sans-serif; font-size: 0.9rem; font-weight: 700;
   color: rgba(255,255,255,0.6); margin: 0 0 22px;
   text-transform: uppercase; letter-spacing: 0.05em;
+  padding-top: 20px;
 }
 .security-section p {
   font-family: 'Syne', sans-serif; padding: 3px 10px; border-radius: 100px;
@@ -197,7 +194,39 @@ onBeforeMount(async () => {
   font-family: 'Syne', sans-serif; padding: 3px 10px; border-radius: 100px;
   letter-spacing: 0.04em;
 }
+#enabled-2fa {
+  color: #34d399;
+}
+#disabled-2fa{
+  color: #f87171;
+}
+.btn-link {
+  /* Crucial for padding and margins to behave correctly */
+  display: inline-block; 
+  
+  /* Visual styling */
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+  padding: 12px; border-radius: 11px; border: none;
+  background: linear-gradient(135deg, #6366f1, #8b5cf6);
+  color: white; font-family: 'Syne', sans-serif;
+  font-size: 0.85rem; font-weight: 700; cursor: pointer;
+  transition: all 0.2s; box-shadow: 0 6px 18px rgba(99,102,241,0.28);
+  margin-top: 4px;
+  
+  /* Clear typography defaults for links */
+  text-decoration: none; 
+  text-align: center;
+  font-weight: 500;
+  
+  /* Smooth interaction states */
+  transition: background-color 0.2s ease;
+}
 
+.btn-link:hover:not(:disabled) { opacity: 0.9; }
+
+.btn-link:active {
+  background-color: #1e40af;
+}
 @media (max-width: 640px) {
   .gs-profile-grid { grid-template-columns: 1fr; }
   .gs-profile-hero { flex-direction: column; text-align: center; }
