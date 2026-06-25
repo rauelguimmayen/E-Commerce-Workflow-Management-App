@@ -38,18 +38,9 @@ onBeforeUnmount(() => {
       </router-link>
 
       <!-- Desktop Nav Links -->
-      <div class="gs-nav-links">
+      <div class="gs-nav-links d-flex justify-content-center">
         <router-link :to="{ name: 'Products' }" class="gs-nav-link" v-if="!store.user.isAdmin">
           Browse Products
-        </router-link>
-        <router-link :to="{ name: 'Products' }" class="gs-nav-link" v-if="store.user.email && store.user.isAdmin">
-          Dashboard
-        </router-link>
-        <router-link :to="{ name: 'AddProduct' }" class="gs-nav-link" v-if="store.user.email && store.user.isAdmin">
-          Add Product
-        </router-link>
-        <router-link :to="{ name: 'OrdersPage' }" class="gs-nav-link" v-if="store.user.email && store.user.isAdmin">
-          Orders
         </router-link>
       </div>
 
@@ -85,6 +76,7 @@ onBeforeUnmount(() => {
               <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
               My Orders
             </button>
+
             <button class="gs-dropdown-item" v-if="store.user.email" @click="$router.push({ name: 'ProfilePage' }); menuOpen = false">
               <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
               Profile
@@ -106,6 +98,13 @@ onBeforeUnmount(() => {
               <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 3h4a2 2 0 012 2v14a2 2 0 01-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>
               Login
             </button>
+            <div class="gs-dropdown-divider" v-if="store.user.email && store.user.isAdmin"></div>
+            <router-link :to="{ name: 'Products' }" class="gs-dropdown-item" v-if="store.user.email && store.user.isAdmin" @click="$router.push({ name: 'Products' }); menuOpen = false">
+              Dashboard
+            </router-link>
+            <router-link :to="{ name: 'OrdersPage' }" class="gs-dropdown-item" v-if="store.user.email && store.user.isAdmin" @click="$router.push({ name: 'OrdersPage' }); menuOpen = false">
+              Orders
+            </router-link>
           </div>
         </div>
       </div>
@@ -115,7 +114,9 @@ onBeforeUnmount(() => {
 
 <style scoped>
 @import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&display=swap');
-
+* {
+  text-decoration: none;
+}
 .gs-navbar {
   position: fixed;
   top: 0;

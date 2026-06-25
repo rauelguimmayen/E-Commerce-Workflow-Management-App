@@ -294,24 +294,22 @@ onMounted(fetchProducts)
 .gs-tbl-delete {
   background: rgba(239,68,68,0.08);
   border: 1px solid rgba(239,68,68,0.2);
-  color: #f87171;
+  /*color: #f87171;*/
 }
 .gs-tbl-delete:hover {
   background: rgba(239,68,68,0.18);
   border-color: rgba(239,68,68,0.4);
-  color: #fca5a5;
 }
 
 .gs-tbl-edit {
-  background: rgba(239,68,68,0.08);
-  border: 1px solid rgba(239,68,68,0.2);
-  color: #f87171;
+  background: rgba(92,184,116,0.08);
+  border: 1px solid rgba(92,184,116,0.2);
 }
 .gs-tbl-edit:hover {
-  background: rgba(239,68,68,0.18);
-  border-color: rgba(239,68,68,0.4);
-  color: #fca5a5;
+  background: rgba(92,184,116,0.18);
+  border-color: rgba(92,184,116,0.4);
 }
+
 #delbtn, #editbtn {
   margin-left: auto;
 }
